@@ -9,4 +9,5 @@ git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --grap
 })
 
 henting:
+https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository //Førstegangs oppretting av local repository
 git pull //henter fra github
