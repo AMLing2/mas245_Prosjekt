@@ -3,27 +3,29 @@ helloWorld.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000de  2**0
+  0 .data         00000000  00800100  00800100  0000011e  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000008a  00000000  00000000  00000054  2**1
+  1 .text         000000ca  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000de  2**0
+  2 .comment      00000030  00000000  00000000  0000011e  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000110  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000150  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000020  00000000  00000000  0000014c  2**0
+  4 .debug_aranges 00000030  00000000  00000000  0000018c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000068f  00000000  00000000  0000016c  2**0
+  5 .debug_info   000007b9  00000000  00000000  000001bc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000005f5  00000000  00000000  000007fb  2**0
+  6 .debug_abbrev 000006cb  00000000  00000000  00000975  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000175  00000000  00000000  00000df0  2**0
+  7 .debug_line   0000029c  00000000  00000000  00001040  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000024  00000000  00000000  00000f68  2**2
+  8 .debug_frame  00000044  00000000  00000000  000012dc  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000039d  00000000  00000000  00000f8c  2**0
+  9 .debug_str    00000413  00000000  00000000  00001320  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000010  00000000  00000000  00001329  2**0
+ 10 .debug_loc    00000090  00000000  00000000  00001733  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000020  00000000  00000000  000017c3  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -63,25 +65,92 @@ Disassembly of section .text:
   6e:	d4 e0       	ldi	r29, 0x04	; 4
   70:	de bf       	out	0x3e, r29	; 62
   72:	cd bf       	out	0x3d, r28	; 61
-  74:	0e 94 40 00 	call	0x80	; 0x80 <main>
-  78:	0c 94 43 00 	jmp	0x86	; 0x86 <_exit>
+  74:	0e 94 5a 00 	call	0xb4	; 0xb4 <main>
+  78:	0c 94 63 00 	jmp	0xc6	; 0xc6 <_exit>
 
 0000007c <__bad_interrupt>:
   7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-00000080 <main>:
+00000080 <_Z4initv>:
+//1. where to write DDRB
+//DDRB = 0 = input?
+
+void init()
+{
+	DDRB |= (1 << DDB3); //set pin 3 as output in data-direction of port B
+  80:	84 b1       	in	r24, 0x04	; 4
+  82:	88 60       	ori	r24, 0x08	; 8
+  84:	84 b9       	out	0x04, r24	; 4
+	DDRB &= ~(1 << PB2); //set pin 2 of port B as output?
+  86:	84 b1       	in	r24, 0x04	; 4
+  88:	8b 7f       	andi	r24, 0xFB	; 251
+  8a:	84 b9       	out	0x04, r24	; 4
+  8c:	08 95       	ret
+
+0000008e <_Z5blinkv>:
+}
+
+void blink()
+{
+			PORTB |= (1<<PB3); //high
+  8e:	85 b1       	in	r24, 0x05	; 5
+  90:	88 60       	ori	r24, 0x08	; 8
+  92:	85 b9       	out	0x05, r24	; 5
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  94:	87 ea       	ldi	r24, 0xA7	; 167
+  96:	91 e6       	ldi	r25, 0x61	; 97
+  98:	01 97       	sbiw	r24, 0x01	; 1
+  9a:	f1 f7       	brne	.-4      	; 0x98 <_Z5blinkv+0xa>
+  9c:	00 c0       	rjmp	.+0      	; 0x9e <_Z5blinkv+0x10>
+  9e:	00 00       	nop
+			_delay_ms(100);
+			PORTB &= ~(1<<PB3); //low
+  a0:	85 b1       	in	r24, 0x05	; 5
+  a2:	87 7f       	andi	r24, 0xF7	; 247
+  a4:	85 b9       	out	0x05, r24	; 5
+  a6:	87 ea       	ldi	r24, 0xA7	; 167
+  a8:	91 e6       	ldi	r25, 0x61	; 97
+  aa:	01 97       	sbiw	r24, 0x01	; 1
+  ac:	f1 f7       	brne	.-4      	; 0xaa <_Z5blinkv+0x1c>
+  ae:	00 c0       	rjmp	.+0      	; 0xb0 <_Z5blinkv+0x22>
+  b0:	00 00       	nop
+  b2:	08 95       	ret
+
+000000b4 <main>:
+}
+
 int main(void)
 {
-	int tall = 1.0;
-	int svar = tall * 2;
-	return 0;
-}
-  80:	80 e0       	ldi	r24, 0x00	; 0
-  82:	90 e0       	ldi	r25, 0x00	; 0
-  84:	08 95       	ret
+	//initialize
+	init();
+  b4:	0e 94 40 00 	call	0x80	; 0x80 <_Z4initv>
+	PORTB &= ~(1<<PB3); //set pin 3 low
+  b8:	85 b1       	in	r24, 0x05	; 5
+  ba:	87 7f       	andi	r24, 0xF7	; 247
+  bc:	85 b9       	out	0x05, r24	; 5
+	bool a = true;
+	uint8_t pin2Value = 0;
+	
+	while (true) // run forever
+	{
+		pin2Value = (PINB & (1 << PB2)) >> PB2; // read pin 2 value, 0 if low, 1 if high
+  be:	83 b1       	in	r24, 0x03	; 3
+		{
+			a = ~a; //turn on or off blinking
+		}
+		if (a)
+		{
+			blink();
+  c0:	0e 94 47 00 	call	0x8e	; 0x8e <_Z5blinkv>
+  c4:	fc cf       	rjmp	.-8      	; 0xbe <main+0xa>
 
-00000086 <_exit>:
-  86:	f8 94       	cli
+000000c6 <_exit>:
+  c6:	f8 94       	cli
 
-00000088 <__stop_program>:
-  88:	ff cf       	rjmp	.-2      	; 0x88 <__stop_program>
+000000c8 <__stop_program>:
+  c8:	ff cf       	rjmp	.-2      	; 0xc8 <__stop_program>
