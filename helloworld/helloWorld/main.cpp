@@ -33,15 +33,15 @@ int main(void)
 {
 	//initialize
 	init();
-	PORTD &= ~(1<<PD7); //set pin 3 low
+	PORTD &= ~(1<<PD7); //set pin 7 low
 	bool a = true;
-	uint8_t pin2Value = 0;
+	uint8_t pin6Value = 0;
 	
 	while (true) // run forever
 	{
-		pin2Value = (PIND & (1 << PD6)) >> PD6; // read pin 6 value, 0 if low, 1 if high
+		pin6Value = (PIND & (1 << PD6)) >> PD6; // read pin 6 value, 0 if low, 1 if high
 		
-		if (pin2Value == 1) // if pin 6 of port D is high
+		if (pin6Value == 0) // if pin 6 of port D is low
 		{
 			a = ~a; //turn on or off blinking
 		}
