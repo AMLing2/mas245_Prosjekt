@@ -1,0 +1,9 @@
+git add <fil> //setter fil til greia
+git add --all <folder> //setter in alle filene i folderen
+git reset //fjerner alt fra add
+git status //vis hva er i add
+git commit -m <"comment"> //commit add med comment
+git push -u origin main //push commit til github fra main branch
+git hist //vis log på fin måte (alias av: {
+git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"
+})
