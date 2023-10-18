@@ -5,7 +5,7 @@
  * Author : mathi
  */ 
 
-#define F_CPU 1000000 //1MHz, set cpu frequency in Hz, datablad side 
+#define F_CPU 1000000 //1MHz, set cpu frequency in Hz, datablad side...
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>

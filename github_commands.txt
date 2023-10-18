@@ -7,3 +7,6 @@ git push -u origin main //push commit til github fra main branch
 git hist //vis log på fin måte (alias av: {
 git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"
 })
+
+henting:
+git pull //henter fra github
