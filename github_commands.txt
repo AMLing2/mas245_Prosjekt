@@ -11,6 +11,7 @@ git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --grap
 git hist --all //vis alle brancher
 
 henting:
+<<<<<<< HEAD
 git pull //henter fra github, fetch + merge
 git fetch origin //henter origin fra github unten å merge
 git diff [main] origin/main //viser forsjell med github main branch og din egen filer, [main] = din branch, la være main (uten []) for main branch
@@ -23,3 +24,7 @@ git checkout -b main //tilbake til main branch
 git merge main //(etter git checkout [branch navn]) merger branch med main
 
 main = master
+=======
+https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository //Førstegangs oppretting av local repository
+git pull //henter fra github
+>>>>>>> 8a08251e037b4b9b621c98e207586ec4040c2483
