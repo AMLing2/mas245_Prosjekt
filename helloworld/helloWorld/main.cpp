@@ -19,21 +19,22 @@ void init()
 {
 	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
 	DDRD &= ~(1 << PIND6); //set pin 6 of port D as output
+	PORTD &= ~(1<<PD7); //set pin 7 low
 }
 
 void blink()
 {
-			PORTD |= (1<<PD7); //high
-			_delay_ms(100);
-			PORTD &= ~(1<<PD7); //low
-			_delay_ms(100);
+		PORTD |= (1<<PD7); //high
+		_delay_ms(100);
+		PORTD &= ~(1<<PD7); //low
+		_delay_ms(100);
 }
 
 int main(void)
 {
 	//initialize
 	init();
-	PORTD &= ~(1<<PD7); //set pin 7 low
+	
 	bool a = true;
 	uint8_t pin6Value = 0;
 	

@@ -8,7 +8,7 @@
 #define F_CPU 1000000 //1MHz, set cpu frequency in Hz, datablad side...
 #include <avr/io.h>
 #include <stdio.h>
-#define __DELAY_BACKWARD_COMPATIBLE__ //required for delay til a funke med variabel
+#define __DELAY_BACKWARD_COMPATIBLE__ //required for delay til a funke med en variabel
 #include <util/delay.h>
 #include <math.h>
 
@@ -20,60 +20,59 @@ void init()
 {
 	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
 	DDRD &= ~(1 << PIND6); //set pin 6 of port D as output
+	PORTD &= ~(1<<PD7); //set pin 7 low
 }
 
-void ledBrightness(const double duty)
+void ledBrightness(const double dutyCycle,const double freq)
 {
-	  double T = 10.0; //ms
-	  //double dutyCycle = PWM/0.87; //ms
-	  double onTime = duty * T; //ms
+	  const double T = (1.0/freq) * static_cast<double>(10^3); //time in ms for 1 PWM cycle, f = 1/T
+	  double onTime = dutyCycle * T; //ms
 	  
-	  //uint32_t onTimeint = static_cast<uint32_t>(onTime); //float to ms
+	  //uint32_t onTimeint = static_cast<uint32_t>(onTime); //float to uint ms
 	  if(onTime >= T)
 	  {
-		  onTime = T; // protection so not negative
+		  onTime = T; // protection so not negative time
 	  }
 	  
 	  //PWM code:
-	  PORTD |= (1<<PD7);
+	  PORTD |= (1<<PD7); //D7 high
 	  _delay_ms(onTime);
 	  if (onTime != T)
 	  {
-			PORTD &= ~(1<<PD7); //low
+			PORTD &= ~(1<<PD7); //D7 low
 			_delay_ms(T-onTime);
 	  }
-			
-
 }
 
 int main(void)
 {
 	//initialize
 	init();
-	PORTD &= ~(1<<PD7); //set pin 7 low
-	double a = 1;
+	//main variables:
+	double a = 1.0;
 	uint8_t pin6Value = 0;
-	double angle = 0; //rad
-	double pwmPerc = 0;
+	double angle = 0.0; //rad
+	double pwmPerc = 0.0;
 	const double increase = 0.5;
 	
 	while (true) // run forever
 	{
 		pin6Value = (PIND & (1 << PD6)) >> PD6; // read pin 6 value, 0 if low, 1 if high
 		
-		//button functionality: (blink speed)
+		//button functionality: change blink speed
 		if (pin6Value == 0 && a <= 5.0) // if pin 6 of port D is low
 		{
-			a = a + increase; //increase
+			a = a + increase; //increase angle increaser
 		}
 		else if (pin6Value == 0 && a > 5.0);
 		{
-			a = 0; //reset speed
+			a = 0.0; //reset speed
 		}
 		
 		//soft blink:
-		pwmPerc = (1 + sin(angle))*0.5; //math for blink
-		ledBrightness(pwmPerc);
+		//pwmPerc = (1 + sin(angle))*0.5; //math for blink
+		pwmPerc = 0.5;
+		ledBrightness(pwmPerc,120.0);
 		
 		//increase angle
 		if (angle < (2.0 * M_PI))
@@ -82,8 +81,8 @@ int main(void)
 		}
 		else
 		{
-			angle = 0;
-		}	
+			angle = 0.0;
+		}
 	}
 	return 0;
 }
