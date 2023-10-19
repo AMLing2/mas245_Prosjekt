@@ -77,14 +77,14 @@ Disassembly of section .text:
 
 void init()
 {
-	DDRB |= (1 << DDB3); //set pin 3 as output in data-direction of port B
-  80:	84 b1       	in	r24, 0x04	; 4
-  82:	88 60       	ori	r24, 0x08	; 8
-  84:	84 b9       	out	0x04, r24	; 4
-	DDRB &= ~(1 << PB2); //set pin 2 of port B as output?
-  86:	84 b1       	in	r24, 0x04	; 4
-  88:	8b 7f       	andi	r24, 0xFB	; 251
-  8a:	84 b9       	out	0x04, r24	; 4
+	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
+  80:	8a b1       	in	r24, 0x0a	; 10
+  82:	80 68       	ori	r24, 0x80	; 128
+  84:	8a b9       	out	0x0a, r24	; 10
+	DDRD &= ~(1 << PIND6); //set pin 6 of port D as output
+  86:	8a b1       	in	r24, 0x0a	; 10
+  88:	8f 7b       	andi	r24, 0xBF	; 191
+  8a:	8a b9       	out	0x0a, r24	; 10
   8c:	08 95       	ret
 
 0000008e <_Z5blinkv>:
@@ -92,10 +92,10 @@ void init()
 
 void blink()
 {
-			PORTB |= (1<<PB3); //high
-  8e:	85 b1       	in	r24, 0x05	; 5
-  90:	88 60       	ori	r24, 0x08	; 8
-  92:	85 b9       	out	0x05, r24	; 5
+			PORTD |= (1<<PD7); //high
+  8e:	8b b1       	in	r24, 0x0b	; 11
+  90:	80 68       	ori	r24, 0x80	; 128
+  92:	8b b9       	out	0x0b, r24	; 11
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
@@ -109,10 +109,10 @@ void blink()
   9c:	00 c0       	rjmp	.+0      	; 0x9e <_Z5blinkv+0x10>
   9e:	00 00       	nop
 			_delay_ms(100);
-			PORTB &= ~(1<<PB3); //low
-  a0:	85 b1       	in	r24, 0x05	; 5
-  a2:	87 7f       	andi	r24, 0xF7	; 247
-  a4:	85 b9       	out	0x05, r24	; 5
+			PORTD &= ~(1<<PD7); //low
+  a0:	8b b1       	in	r24, 0x0b	; 11
+  a2:	8f 77       	andi	r24, 0x7F	; 127
+  a4:	8b b9       	out	0x0b, r24	; 11
   a6:	87 ea       	ldi	r24, 0xA7	; 167
   a8:	91 e6       	ldi	r25, 0x61	; 97
   aa:	01 97       	sbiw	r24, 0x01	; 1
@@ -129,17 +129,17 @@ int main(void)
 	//initialize
 	init();
   b4:	0e 94 40 00 	call	0x80	; 0x80 <_Z4initv>
-	PORTB &= ~(1<<PB3); //set pin 3 low
-  b8:	85 b1       	in	r24, 0x05	; 5
-  ba:	87 7f       	andi	r24, 0xF7	; 247
-  bc:	85 b9       	out	0x05, r24	; 5
+	PORTD &= ~(1<<PD7); //set pin 7 low
+  b8:	8b b1       	in	r24, 0x0b	; 11
+  ba:	8f 77       	andi	r24, 0x7F	; 127
+  bc:	8b b9       	out	0x0b, r24	; 11
 	bool a = true;
-	uint8_t pin2Value = 0;
+	uint8_t pin6Value = 0;
 	
 	while (true) // run forever
 	{
-		pin2Value = (PINB & (1 << PB2)) >> PB2; // read pin 2 value, 0 if low, 1 if high
-  be:	83 b1       	in	r24, 0x03	; 3
+		pin6Value = (PIND & (1 << PD6)) >> PD6; // read pin 6 value, 0 if low, 1 if high
+  be:	89 b1       	in	r24, 0x09	; 9
 		{
 			a = ~a; //turn on or off blinking
 		}
