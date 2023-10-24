@@ -1615,7 +1615,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </part>
 <part name="GND8" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="GND" device=""/>
 <part name="D3" library="SparkFun-LED" library_urn="urn:adsk.eagle:library:529" deviceset="LED" device="5MM" package3d_urn="urn:adsk.eagle:package:39353/2"/>
-<part name="R3" library="SparkFun-Resistors" library_urn="urn:adsk.eagle:library:532" deviceset="10OHM" device="-HORIZ-1/4W-1%" package3d_urn="urn:adsk.eagle:package:39658/2" value="84Ω"/>
+<part name="R3" library="SparkFun-Resistors" library_urn="urn:adsk.eagle:library:532" deviceset="10OHM" device="-HORIZ-1/4W-1%" package3d_urn="urn:adsk.eagle:package:39658/2" value="330Ω"/>
 </parts>
 <sheets>
 <sheet>
@@ -1653,7 +1653,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 </instance>
 <instance part="R3" gate="G$1" x="172.72" y="116.84" smashed="yes">
 <attribute name="NAME" x="172.72" y="118.364" size="1.778" layer="95" font="vector" align="bottom-center"/>
-<attribute name="VALUE" x="172.72" y="115.316" size="1.778" layer="96" font="vector" align="top-center"/>
+<attribute name="VALUE" x="172.72" y="115.316" size="1.778" layer="91" font="vector" align="top-center"/>
 </instance>
 </instances>
 <busses>
