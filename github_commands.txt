@@ -1,20 +1,24 @@
+pushing:
 git add <fil> //setter fil til greia
 git add --all <folder> //setter in alle filene i folderen
 git reset //fjerner alt fra add
 git status //vis hva er i add
+git rm <fil> //for sletting av filer for gitub
 git commit -m <"comment"> //commit add med comment
 git push -u origin main //push commit til github fra main branch
-
-git hist //vis log på fin måte (alias av: {
-git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"
-})
-git hist --all //vis alle brancher
 
 henting:
 git pull //henter fra github, fetch + merge
 git fetch origin //henter origin fra github unten å merge
 git diff [main] origin/main //viser forsjell med github main branch og din egen filer, [main] = din branch, la være main (uten []) for main branch
 git merge origin/main //merger fra github til din
+git clone [https.git] //for setting opp av ny repo
+
+fine greier:
+git hist //vis log på fin måte (alias av: {
+git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"
+})
+git hist --all //vis alle brancher
 
 branching:
 git checkout -b [branch navn] //lager branch

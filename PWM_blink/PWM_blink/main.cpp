@@ -19,8 +19,9 @@
 void init()
 {
 	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
-	DDRD &= ~(1 << PIND6); //set pin 6 of port D as output
+	DDRD &= ~(1 << PIND6); //set pin 6 of port D as input
 	PORTD &= ~(1<<PD7); //set pin 7 low
+	PORTD |= (1<<PD6); //set pin 6 high to enable pull up-resistor to read state
 }
 
 void ledBrightness(const double dutyCycle,const double freq)
