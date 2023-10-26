@@ -5,11 +5,11 @@
  * Author : mathi
  */ 
 
-#define F_CPU 1000000 //1MHz, set cpu frequency in Hz, datablad side...
+#define F_CPU 8000000 // 8 [MHz] CPU frequency
 #include <avr/io.h>
 #include <stdio.h>
 #include <util/delay.h>
-#include <avr/interrupt.h> //unused?
+#include <avr/interrupt.h>
 
 
 //questions: 
@@ -23,23 +23,23 @@ namespace intVars
 
 void init()
 {
-	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
-	DDRD &= ~(1 << PIND6); //set pin 6 of port D as input
-	PORTD &= ~(1<<PD7); //set pin 7 low as initial value
-	PORTD |= (1<<PD6); //set pin 6 high to enable pull up-resistor to read state
+	DDRD |= (1 << DDD7);	//set pin 7 as output in data-direction of port D
+	DDRD &= ~(1 << PIND6);	//set pin 6 of port D as input
+	PORTD &= ~(1<<PD7);		//set pin 7 low as initial value
+	PORTD |= (1<<PD6);		//set pin 6 high to enable pull up-resistor to read state
 	
 	// pin change interrupt:
-	PCICR |= (1<<PCIE2); // enable pin change interrupt control register PCIE2 for PD6
-	PCMSK2 |= (1<<PCINT22); //enable pin change mask register for PCINT22 PD6, not external
-	sei(); //enable global interrupt, enable I-bit of SREG
+	PCICR |= (1<<PCIE2);	// enable Pin Change Interrupt Control Register PCIE2 for PD6
+	PCMSK2 |= (1<<PCINT22); // enable Pin Change Mask register for PCINT22 PD6, not external
+	sei();					// enable global interrupt, enable I-bit of SREG
 	
-	//namespace initial:
+	// namespace initial:
 	intVars::count = 0;
 	intVars::timerInterrupt = 0;
 	intVars::interrupted = false;
 }
 
-ISR(PCINT2_vect)
+ISR(PCINT2_vect)	// Interrupt Service Routine
 {
 	if ((( ( PIND & (1 << PD6) ) >> PD6 ) == 0) & (intVars::timerInterrupt == 0)) //enable only if button is low/pushed down
 	{
