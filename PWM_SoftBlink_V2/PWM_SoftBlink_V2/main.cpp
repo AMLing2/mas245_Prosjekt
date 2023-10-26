@@ -8,14 +8,16 @@
 #define F_CPU 8000000	// 8 [MHz] from datasheet: ATMEGA168-20PU
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <stdio.h>	// Usikker med denne
+#include <cmath>
 #include <util/delay.h>
+#define __DELAY_BACKWARD_COMPATIBLE__ // Required for variable delay
+#define PI 3.14159265
 
 void init()
 {
-	// Define LED-pin
-	//const uint8_t ledPin = PB1;	// Pin 15 on ATMEGA168-20PU
 	
-  // ----------------- PWM Configuration -----------------
+  // --------------------- PWM Configuration ---------------------
 
 	// Fast PWM mode - 10 [bit] (Mode 7 from table 20-6)
 		// Waveform Generation Mode
@@ -31,19 +33,36 @@ void init()
 	// Set prescaler:
 		// f_Clk = 16 [MHz], f_des = 250 [kHz]
 		// Ratio = prescaler = N = 16/0.25 = 64
+	TCCR1B |=  (1 << CS10) | (1 << CS11);
+	TCCR1B &= ~(1 << CS12);
 	
-
-  // ----------------- PWM Configuration -----------------
+  // --------------------- PWM Configuration ---------------------
   
+	// Configure Output Compare Pin: PB1 = pin 15
+	DDRB |= (1 << DDD1);
 }
 
 int main(void)
 {
 	init();	// Initialize
 
+// ------------- Main Variables -------------
+
+	double t = 0.0;		// [seconds]
+	const double f = 0.5;				// Speed of pulse, [Hz]
+	const double fsRad = f*2.0*PI;		// Speed of pulse, [rad/sec]
+
+		// Set the Duty Cycle
+	double dutyCycle = 0.0;	// Default Duty Cycle
+	OCR1A = dutyCycle * 1023;	// [bit]
+	
+// ------------- Main Variables -------------
+	
     while (true) 
     {
-		// Do nothing.
+		// Soft Blink sine
+		t += 0.01;
+		dutyCycle = (1.0 - std::sin(fsRad*t))*0.5; // Sets duty cycle for PWM
     }
 	return 0;
 }
