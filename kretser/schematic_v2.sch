@@ -2699,6 +2699,7 @@ general purpose rectifier, 1 A</description>
 <part name="SUPPLY3" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="VCC" device="" value="VCC"/>
 <part name="SUPPLY4" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="VCC" device="" value="VCC"/>
 <part name="R1" library="SparkFun-Resistors" library_urn="urn:adsk.eagle:library:532" deviceset="10OHM" device="-HORIZ-1/4W-1%" package3d_urn="urn:adsk.eagle:package:39658/2" value="330Ω"/>
+<part name="SUPPLY2" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="VCC" device="" value="VCC"/>
 </parts>
 <sheets>
 <sheet>
@@ -2770,7 +2771,7 @@ general purpose rectifier, 1 A</description>
 <attribute name="VALUE" x="177.8" y="70.866" size="1.778" layer="96" font="vector" align="top-center"/>
 </instance>
 <instance part="D3" gate="D1" x="154.94" y="73.66" smashed="yes" rot="R90">
-<attribute name="NAME" x="159.512" y="70.231" size="1.778" layer="95" font="vector" rot="R180"/>
+<attribute name="NAME" x="154.432" y="70.231" size="1.778" layer="95" font="vector" rot="R180"/>
 <attribute name="VALUE" x="159.512" y="75.565" size="1.778" layer="96" font="vector" rot="R180" align="top-left"/>
 </instance>
 <instance part="R3" gate="G$1" x="167.64" y="73.66" smashed="yes">
@@ -2818,6 +2819,9 @@ general purpose rectifier, 1 A</description>
 <instance part="R1" gate="G$1" x="40.64" y="109.22" smashed="yes" rot="R90">
 <attribute name="NAME" x="39.116" y="109.22" size="1.778" layer="95" font="vector" rot="R90" align="bottom-center"/>
 <attribute name="VALUE" x="42.164" y="109.22" size="1.778" layer="96" font="vector" rot="R90" align="top-center"/>
+</instance>
+<instance part="SUPPLY2" gate="G$1" x="81.28" y="93.98" smashed="yes">
+<attribute name="VALUE" x="81.28" y="98.806" size="1.778" layer="96" font="vector" rot="R180" align="bottom-center"/>
 </instance>
 </instances>
 <busses>
@@ -2979,21 +2983,25 @@ general purpose rectifier, 1 A</description>
 <pinref part="SUPPLY4" gate="G$1" pin="VCC"/>
 <pinref part="IC1" gate="G$1" pin="VCC@1"/>
 <wire x1="96.52" y1="78.74" x2="93.98" y2="78.74" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="78.74" x2="93.98" y2="76.2" width="0.1524" layer="91"/>
-<pinref part="C3" gate="G$1" pin="1"/>
-<wire x1="93.98" y1="76.2" x2="86.36" y2="76.2" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="68.58" x2="93.98" y2="68.58" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="68.58" x2="93.98" y2="76.2" width="0.1524" layer="91"/>
-<junction x="93.98" y="76.2"/>
+<wire x1="93.98" y1="68.58" x2="93.98" y2="73.66" width="0.1524" layer="91"/>
+<pinref part="C3" gate="G$1" pin="1"/>
+<wire x1="93.98" y1="73.66" x2="93.98" y2="78.74" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="76.2" x2="86.36" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="73.66" x2="93.98" y2="73.66" width="0.1524" layer="91"/>
+<junction x="93.98" y="73.66"/>
 </segment>
-</net>
-<net name="N$5" class="0">
 <segment>
-<pinref part="C5" gate="G$1" pin="1"/>
 <pinref part="IC1" gate="G$1" pin="AVCC"/>
 <wire x1="96.52" y1="104.14" x2="93.98" y2="104.14" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="104.14" x2="93.98" y2="101.6" width="0.1524" layer="91"/>
-<wire x1="93.98" y1="101.6" x2="86.36" y2="101.6" width="0.1524" layer="91"/>
+<pinref part="SUPPLY2" gate="G$1" pin="VCC"/>
+<wire x1="81.28" y1="93.98" x2="93.98" y2="93.98" width="0.1524" layer="91"/>
+<wire x1="93.98" y1="93.98" x2="93.98" y2="99.06" width="0.1524" layer="91"/>
+<pinref part="C5" gate="G$1" pin="1"/>
+<wire x1="93.98" y1="99.06" x2="93.98" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="101.6" x2="86.36" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="99.06" x2="93.98" y2="99.06" width="0.1524" layer="91"/>
+<junction x="93.98" y="99.06"/>
 </segment>
 </net>
 <net name="V_IN1" class="0">
