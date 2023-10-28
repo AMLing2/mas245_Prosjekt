@@ -2854,8 +2854,8 @@ general purpose rectifier, 1 A</description>
 <part name="R2" library="SparkFun-Resistors" library_urn="urn:adsk.eagle:library:532" deviceset="10OHM" device="-HORIZ-1/4W-1%" package3d_urn="urn:adsk.eagle:package:39658/2" value="10kΩ"/>
 <part name="GND9" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="GND" device=""/>
 <part name="SUPPLY7" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="VCC" device="" value="AVCC"/>
-<part name="SUPPLY8" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="VCC" device="" value="AVCC"/>
 <part name="C1" library="SparkFun-Capacitors" library_urn="urn:adsk.eagle:library:510" deviceset="470PF" device="-0603-50V-5%" package3d_urn="urn:adsk.eagle:package:41385090/1" value="100nF"/>
+<part name="GND10" library="SparkFun-PowerSymbols" library_urn="urn:adsk.eagle:library:530" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -2993,12 +2993,12 @@ general purpose rectifier, 1 A</description>
 <instance part="SUPPLY7" gate="G$1" x="177.8" y="114.3" smashed="yes">
 <attribute name="VALUE" x="177.8" y="119.126" size="1.778" layer="96" font="vector" rot="R180" align="bottom-center"/>
 </instance>
-<instance part="SUPPLY8" gate="G$1" x="81.28" y="127" smashed="yes">
-<attribute name="VALUE" x="81.28" y="131.826" size="1.778" layer="96" font="vector" rot="R180" align="bottom-center"/>
-</instance>
 <instance part="C1" gate="G$1" x="88.9" y="127" smashed="yes" rot="R270">
 <attribute name="NAME" x="90.424" y="122.301" size="1.778" layer="95" font="vector"/>
 <attribute name="VALUE" x="87.884" y="129.921" size="1.778" layer="96" font="vector"/>
+</instance>
+<instance part="GND10" gate="1" x="81.28" y="124.46" smashed="yes">
+<attribute name="VALUE" x="81.28" y="124.206" size="1.778" layer="96" font="vector" align="top-center"/>
 </instance>
 </instances>
 <busses>
@@ -3073,6 +3073,11 @@ general purpose rectifier, 1 A</description>
 <pinref part="VR1" gate="G$1" pin="E"/>
 <wire x1="177.8" y1="99.06" x2="172.72" y2="99.06" width="0.1524" layer="91"/>
 </segment>
+<segment>
+<pinref part="C1" gate="G$1" pin="2"/>
+<wire x1="81.28" y1="127" x2="86.36" y2="127" width="0.1524" layer="91"/>
+<pinref part="GND10" gate="1" pin="GND"/>
+</segment>
 </net>
 <net name="SPI_RESET" class="0">
 <segment>
@@ -3113,13 +3118,6 @@ general purpose rectifier, 1 A</description>
 <pinref part="SPI" gate="G$1" pin="4"/>
 <wire x1="167.64" y1="50.8" x2="175.26" y2="50.8" width="0.1524" layer="91"/>
 <wire x1="175.26" y1="50.8" x2="175.26" y2="60.96" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$4" class="0">
-<segment>
-<pinref part="IC1" gate="G$1" pin="PD7(AIN1)"/>
-<pinref part="D3" gate="D1" pin="A"/>
-<wire x1="144.78" y1="73.66" x2="152.4" y2="73.66" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -3189,11 +3187,6 @@ general purpose rectifier, 1 A</description>
 <pinref part="SUPPLY7" gate="G$1" pin="VCC"/>
 <pinref part="VR1" gate="G$1" pin="A"/>
 <wire x1="177.8" y1="114.3" x2="172.72" y2="114.3" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="SUPPLY8" gate="G$1" pin="VCC"/>
-<pinref part="C1" gate="G$1" pin="2"/>
-<wire x1="81.28" y1="127" x2="86.36" y2="127" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="V_IN1" class="0">
@@ -3265,6 +3258,15 @@ general purpose rectifier, 1 A</description>
 <wire x1="96.52" y1="106.68" x2="93.98" y2="106.68" width="0.1524" layer="91"/>
 <wire x1="93.98" y1="106.68" x2="93.98" y2="127" width="0.1524" layer="91"/>
 <pinref part="C1" gate="G$1" pin="1"/>
+</segment>
+</net>
+<net name="N$4" class="0">
+<segment>
+<pinref part="D3" gate="D1" pin="A"/>
+<wire x1="152.4" y1="73.66" x2="149.86" y2="73.66" width="0.1524" layer="91"/>
+<wire x1="149.86" y1="73.66" x2="149.86" y2="66.04" width="0.1524" layer="91"/>
+<pinref part="IC1" gate="G$1" pin="PB1(OC1A)"/>
+<wire x1="149.86" y1="66.04" x2="144.78" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
