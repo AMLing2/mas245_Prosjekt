@@ -5,7 +5,7 @@
  * Author : mathi
  */ 
 
-#define F_CPU 8000000 //8MHZ cpu freq
+#define F_CPU 1000000 //8MHZ cpu freq
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -15,8 +15,8 @@
 //REG |= (1<<REG1) | (1<<REG2).... format
 namespace adcVars
 {
-	volatile uint8_t adcUint1;
-	volatile uint8_t adcUint2;
+	volatile uint8_t adcUintL;
+	volatile uint8_t adcUintH;
 	volatile bool adcCompleted;
 }
 
@@ -33,29 +33,30 @@ void init()
 	
 	//ADC initials:
 	
-	//ADCSRA = 0b 1010 1000; 
+	//ADCSRA = 0b 1010 1011; 
 						  //bit 7 - enable ADC, bit 6 - start free running mode, bit 4 - enable auto trigger/ free running mode
 						  //bit 3 - ADC interrupt enabled, edit last 3 bits later when PWM implemented
-	ADCSRA |= (1<<ADEN) | (1<<ADATE) | (1<<ADIE); //MODIFY LAST 3 BITS!!!!!!!!!!!!!!1
-	//ADMUX =  0b 0110 0011; 
-						// bit 7:6-external capacitor on AREF, bit 5- left adjusted, bit 3:0- using pin PC3
-	ADMUX |= (1<<REFS0) | (1<<ADLAR) | (1<<MUX1) | (1<<MUX0);
-	adcVars::adcUint = 0x0;
+	ADCSRA |= (1<<ADEN) | (1<<ADATE) | (1<<ADIE) & ~(1<<ADPS2) | (1<<ADPS1) |(1<<ADPS0); //ADPS = divided by 8 for 125kHz
+	//ADMUX =  0b 0100 0011; 
+						// bit 7:6-external capacitor on AREF, bit 5- right adjusted, bit 3:0- using pin PC3
+	ADMUX |= (1<<REFS0)| (1<<MUX1) | (1<<MUX0); //(1<<ADLAR) 
+	adcVars::adcUintL = 0x0;
+	adcVars::adcUintH = 0x0;
 	adcVars::adcCompleted = false;
 	
 	//interrupts
 	sei(); //enable global interrupts, enable I-bit of SREG
 }
 
-ledBrightness(double duty)
+void ledBrightness(double duty)
 {
 	
 }
 
 ISR(ADC_vect) //interrupt for ADC convertion completion
 { 
-	adcVars::adcUint1 = ADCL; //del 1 av 16 bit uint
-	adcVars::adcUint2 = ADCH; //del 2 av 16 bit uint
+	adcVars::adcUintL = ADCL; //adc low del 1 av 16 bit uint
+	adcVars::adcUintH = ADCH; //adc  high del 2 av 16 bit uint
 	adcVars::adcCompleted = true;
 }
 
@@ -72,8 +73,10 @@ int main(void)
 		if(adcVars::adcCompleted) //alternatively could be ran in the ISR but i wanted to keep the ISR short
 		{
 			adc16bit = 0x0; //reset value
-			adc16bit = (adcVars::adcUint1<<8) // bits 15:8 of adc value
-			adc16bit |= (adcVars::adcUint2) //  bits 7:0 of adc value
+			//adcVars::adcUintL = (adcVars::adcUintH>>6)// shifts 
+			adc16bit = static_cast<uint16_t>(adcVars::adcUintH) // bits 15:8 of adc value
+			adc16bit = (adc16bit<<8)//mindre sketchy en å ha << in samme linje som over?
+			adc16bit |= static_cast<uint16_t>(adcVars::adcUintL) //  bits 7:0 of adc value
 			
 			adcVoltage = (static_cast<double>(adc16bit) / 1024.0) * aVCC; //conversion from 10 bit uint to voltage
 			duty = adcVoltage/aVCC; //conversion from voltage to 0-1 percentage for PWM
@@ -83,6 +86,6 @@ int main(void)
 		{
 			//do nothing, wait till next ADC completion
 		}
-		ledBrightness(duty);
+		//ledBrightness(duty);
     }
 }
