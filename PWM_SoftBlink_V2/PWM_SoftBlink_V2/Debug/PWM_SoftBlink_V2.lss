@@ -1,0 +1,160 @@
+
+PWM_SoftBlink_V2.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000000  00800100  00800100  0000012c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         000000d8  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .comment      00000030  00000000  00000000  0000012c  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000015c  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000028  00000000  00000000  00000198  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   000006e9  00000000  00000000  000001c0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000650  00000000  00000000  000008a9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   00000223  00000000  00000000  00000ef9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000034  00000000  00000000  0000111c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    000003e7  00000000  00000000  00001150  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000018  00000000  00000000  00001537  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000018  00000000  00000000  0000154f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+   4:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+   8:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+   c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  10:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  14:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  18:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  1c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  20:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  24:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  28:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  2c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  30:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  34:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  38:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  3c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  40:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  44:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  48:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  4c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  50:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  54:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  58:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  5c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  60:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+  64:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__bad_interrupt>
+
+00000068 <__ctors_end>:
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d4 e0       	ldi	r29, 0x04	; 4
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+  74:	0e 94 5d 00 	call	0xba	; 0xba <main>
+  78:	0c 94 6a 00 	jmp	0xd4	; 0xd4 <_exit>
+
+0000007c <__bad_interrupt>:
+  7c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+00000080 <_Z4initv>:
+	
+  // --------------------- PWM Configuration ---------------------
+
+	// Fast PWM mode - 10 [bit] (Mode 7 from table 20-6)
+		// Waveform Generation Mode
+	TCCR1A |=  (1 << WGM11) | (1 << WGM10);
+  80:	a0 e8       	ldi	r26, 0x80	; 128
+  82:	b0 e0       	ldi	r27, 0x00	; 0
+  84:	8c 91       	ld	r24, X
+  86:	83 60       	ori	r24, 0x03	; 3
+  88:	8c 93       	st	X, r24
+	TCCR1B |=  (1 << WGM12);
+  8a:	e1 e8       	ldi	r30, 0x81	; 129
+  8c:	f0 e0       	ldi	r31, 0x00	; 0
+  8e:	80 81       	ld	r24, Z
+  90:	88 60       	ori	r24, 0x08	; 8
+  92:	80 83       	st	Z, r24
+	TCCR1B &= ~(1 << WGM13);
+  94:	80 81       	ld	r24, Z
+  96:	8f 7e       	andi	r24, 0xEF	; 239
+  98:	80 83       	st	Z, r24
+	
+	// Set Fast PWM Mode NON-INVERTING
+		// PB1 --> Only COM1An
+	TCCR1A &= ~(1 << COM1A0);	// COM1A0 = 0
+  9a:	8c 91       	ld	r24, X
+  9c:	8f 7b       	andi	r24, 0xBF	; 191
+  9e:	8c 93       	st	X, r24
+	TCCR1A |=  (1 << COM1A1);	// COM1A1 = 1
+  a0:	8c 91       	ld	r24, X
+  a2:	80 68       	ori	r24, 0x80	; 128
+  a4:	8c 93       	st	X, r24
+	
+	// Set prescaler:
+		// f_Clk = 16 [MHz], f_des = 250 [kHz]
+		// Ratio = prescaler = N = 16/0.25 = 64
+	TCCR1B |=  (1 << CS11);
+  a6:	80 81       	ld	r24, Z
+  a8:	82 60       	ori	r24, 0x02	; 2
+  aa:	80 83       	st	Z, r24
+	TCCR1B &= ~(1 << CS12) & ~(1 << CS10);
+  ac:	80 81       	ld	r24, Z
+  ae:	8a 7f       	andi	r24, 0xFA	; 250
+  b0:	80 83       	st	Z, r24
+	
+  // --------------------- PWM Configuration ---------------------
+  
+	// Configure Output Compare Pin: PB1 = pin 15
+	DDRB |= (1 << DDB1);
+  b2:	84 b1       	in	r24, 0x04	; 4
+  b4:	82 60       	ori	r24, 0x02	; 2
+  b6:	84 b9       	out	0x04, r24	; 4
+  b8:	08 95       	ret
+
+000000ba <main>:
+}
+
+int main(void)
+{
+	init();	// Initialize
+  ba:	0e 94 40 00 	call	0x80	; 0x80 <_Z4initv>
+	const double f = 0.5;				// Speed of pulse, [Hz]
+	const double fsRad = f*2.0*PI;		// Speed of pulse, [rad/sec]
+
+		// Set the Duty Cycle
+	double dutyCycle = 0.5;	// Default Duty Cycle
+	OCR1A = 0x0;
+  be:	10 92 89 00 	sts	0x0089, r1	; 0x800089 <__TEXT_REGION_LENGTH__+0x7fc089>
+  c2:	10 92 88 00 	sts	0x0088, r1	; 0x800088 <__TEXT_REGION_LENGTH__+0x7fc088>
+	
+    while (true) 
+    {
+			// Updates PWM (Duty Cycle)
+		if ((dutyCycle > 0.0) & (dutyCycle < 1.0))	// Safeguard for [%]
+		{ OCR1A = static_cast<uint16_t>(dutyCycle * 1023.0); }	// [bit]
+  c6:	8f ef       	ldi	r24, 0xFF	; 255
+  c8:	91 e0       	ldi	r25, 0x01	; 1
+  ca:	90 93 89 00 	sts	0x0089, r25	; 0x800089 <__TEXT_REGION_LENGTH__+0x7fc089>
+  ce:	80 93 88 00 	sts	0x0088, r24	; 0x800088 <__TEXT_REGION_LENGTH__+0x7fc088>
+  d2:	f9 cf       	rjmp	.-14     	; 0xc6 <main+0xc>
+
+000000d4 <_exit>:
+  d4:	f8 94       	cli
+
+000000d6 <__stop_program>:
+  d6:	ff cf       	rjmp	.-2      	; 0xd6 <__stop_program>
