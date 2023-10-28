@@ -15,8 +15,8 @@
 
 void init()
 {
-	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
-	PORTD &= ~(1<<PD7);  //set pin 7 low
+	DDRB |= (1 << DDB1); //set pin 7 as output in data-direction of port D
+	PORTB &= ~(1<<PB1);  //set pin 7 low
 }
 
 void ledBrightness(double dutyCycle,const double T)
@@ -29,9 +29,9 @@ void ledBrightness(double dutyCycle,const double T)
 	  }
 	  
 	  //PWM code:
-	  PORTD |= (1<<PD7); //D7 high
+	  PORTB |= (1<<PB1); //D7 high
 	  _delay_ms(onTime);
-      PORTD &= ~(1<<PD7); //D7 low
+      PORTB &= ~(1<<PB1); //D7 low
 	  _delay_ms(T-onTime);
 }
 

@@ -23,9 +23,9 @@ namespace intVars
 
 void init()
 {
-	DDRD |= (1 << DDD7);	//set pin 7 as output in data-direction of port D
+	DDRB |= (1 << DDB1);	//set pin 7 as output in data-direction of port D
 	DDRD &= ~(1 << PIND6);	//set pin 6 of port D as input
-	PORTD &= ~(1<<PD7);		//set pin 7 low as initial value
+	PORTB &= ~(1<<PB1);		//set pin 7 low as initial value
 	PORTD |= (1<<PD6);		//set pin 6 high to enable pull up-resistor to read state
 	
 	// pin change interrupt:
@@ -74,11 +74,11 @@ int main(void)
 		
 		if ((intVars::count % 2) == 1) // if count is odd, turn light on, if count is even turn light off
 		{
-			PORTD |= (1<<PD7); //high
+			PORTB |= (1<<PB1); //high
 		}
 		else
 		{
-			PORTD &= ~(1<<PD7); //low
+			PORTB &= ~(1<<PB1); //low
 		}
 	}
 	return 0;

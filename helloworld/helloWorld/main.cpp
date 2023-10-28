@@ -17,17 +17,17 @@
 
 void init()
 {
-	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
+	DDRB |= (1 << DDB1); //set pin 7 as output in data-direction of port D
 	DDRD &= ~(1 << PIND6); //set pin 6 of port D as input
-	PORTD &= ~(1<<PD7); //set pin 7 low as initial value
+	PORTB &= ~(1<<PB1); //set pin 7 low as initial value
 	PORTD |= (1<<PD6); //set pin 6 high to enable pull up-resistor to read state
 }
 
 void blink()
 {
-		PORTD |= (1<<PD7); //high
+		PORTB |= (1<<PB1); //high
 		_delay_ms(100);
-		PORTD &= ~(1<<PD7); //low
+		PORTB &= ~(1<<PB1); //low
 		_delay_ms(100);
 }
 

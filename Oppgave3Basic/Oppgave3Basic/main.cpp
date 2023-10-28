@@ -12,13 +12,11 @@
 
 
 //questions: 
-//1. where to write DDRB
-//DDRB = 0 = input?
 
 void initPorts()
 {
-	DDRD |= (1 << DDD7); //set pin 7 as output in data-direction of port D
-	PORTD &= ~(1<<PD7); //set pin 7 low as initial value
+	DDRB |= (1 << DDB1); //set pin 7 as output in data-direction of port D
+	PORTB &= ~(1<<PB1); //set pin 7 low as initial value
 }
 
 int main()
@@ -26,7 +24,7 @@ int main()
 	//initialize
 	initPorts();
 	
-	PORTD |= (1<<PD7); //high
+	PORTB |= (1<<PB1); //high
 	
 	return 0;
 }
