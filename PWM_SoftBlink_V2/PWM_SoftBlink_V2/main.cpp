@@ -8,10 +8,7 @@
 // CPU frequency is 1 [MHz], after prescaler of 8 with fuse bit.
 #include <avr/io.h>
 #include <avr/interrupt.h>
-//#include <stdio.h>
 #include <math.h>	// instead of cmath, less work since std library missing
-//#include <util/delay.h>
-//#define __DELAY_BACKWARD_COMPATIBLE__ // Required for variable delay
 #define PI 3.14159265
 
 void init()
@@ -49,7 +46,7 @@ int main(void)
 // ------------- Main Variables -------------
 
 	double t = 0.0;		// [seconds]
-	const double f = 0.5;				// Speed of pulse, [Hz]
+	const double f = 0.1;				// Speed of pulse, [Hz]
 	const double fsRad = f*2.0*PI;		// Speed of pulse, [rad/sec]
 
 		// Set the Duty Cycle
@@ -66,8 +63,8 @@ int main(void)
 		
 		
 			// Soft Blink sine
-		t += 0.01;
-		//dutyCycle = (1.0 - sin(fsRad*t))*0.5; // Sets duty cycle for PWM
+		t += 0.0027; // f_OCnxPWM^(-1)
+		dutyCycle = (1.0 - sin(fsRad*t))*0.5; // Sets duty cycle for PWM
     }
 	return 0;
 }
