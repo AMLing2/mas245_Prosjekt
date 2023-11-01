@@ -1,0 +1,40 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../Mas245/Git"
+		},
+		{
+			"name": "TeensyTest",
+			"path": "../../TeensyTest"
+		},
+		{
+			"name": "OLEDtest",
+			"path": "../../OLEDtest"
+		},
+		{
+			"name": "templateProsjekt",
+			"path": "../../templateProsjekt"
+		},
+		{
+			"name": "Prosjekt2Oppg2",
+			"path": "../../Prosjekt2Oppg2"
+		},
+		{
+			"name": "CanBusTest",
+			"path": "../../CanBusTest"
+		},
+		{
+			"name": "Prosjekt2Oppg3",
+			"path": "../../Prosjekt2Oppg3"
+		},
+		{
+			"name": "PONG",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"cstdint": "cpp"
+		}
+	}
+}
