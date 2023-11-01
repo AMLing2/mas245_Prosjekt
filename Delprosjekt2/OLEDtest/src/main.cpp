@@ -18,11 +18,11 @@
 #include <Adafruit_SSD1306.h>
 
 #include <Fonts/FreeMono9pt7b.h>
-//const int JOY_LEFT = 18;
-//const int JOY_RIGHT = 17;
-//const int JOY_CLICK =19;
-//const int JOY_UP  = 22;
-//const int JOY_DOWN = 23;
+const int JOY_LEFT = 18;
+const int JOY_RIGHT = 17;
+const int JOY_CLICK =19;
+const int JOY_UP  = 22;
+const int JOY_DOWN = 23;
 
 #define OLED_DC     6
 #define OLED_CS     10
