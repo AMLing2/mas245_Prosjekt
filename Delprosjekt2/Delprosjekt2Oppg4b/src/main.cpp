@@ -142,17 +142,27 @@ void setup() {
 
 void loop() {
 
+
+
+
 if (yPos == 63-ballRadius || yPos == 0+ballRadius)
 {
   sprettY(yFart); //Snur y hastighet
 }
 
 
-if (xPos == 0+ballRadius){ //Sjekker om ballen er i kontakt med veggen
+//if (xPos == 0+ballRadius){ //Sjekker om ballen er i kontakt med veggen
+//  sprettX(xFart);
+//}
+
+
+//Hvis host
+if (xPos == 4+ballRadius && (yPos < pad2Y+20 && yPos > pad2Yoppdatert)) //Sjekker om ball treffer paddle2 (venstre)
+{
   sprettX(xFart);
 }
 
-if (xPos == 127-3-ballRadius && (yPos < padY+20 && yPos > padY)) //Sjekker om ball treffer paddle1
+if (xPos == 127-3-ballRadius && (yPos < padY+20 && yPos > padY)) //Sjekker om ball treffer paddle1 (høyre)
 {
   sprettX(xFart);
 }
@@ -168,6 +178,6 @@ sendPaddle1pos();
 can0.disableFIFOInterrupt(); //Stopper interrupts når skjermen tegnes
 display.display(); //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
 can0.enableFIFOInterrupt();
-delay(10); //100 Hz oppdateringsrate
+delay(40); //100 Hz oppdateringsrate
 }
 
