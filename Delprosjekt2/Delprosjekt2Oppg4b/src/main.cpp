@@ -62,14 +62,13 @@ void bevegBallSlave(float &xPos, float &yPos){ //Speilvender ballposisjon
 }
 
 void bevegPad1(int &padY){
-  if(!digitalRead(22) && padY != 0){ //Sjekker om joystick opp er aktiv
- padFart = -1;                      //Opp ned koordinatsystem
-}
+  if(!digitalRead(22) && padY != 0){  //Sjekker om joystick opp er aktiv
+    padFart = -1;                     //Opp ned koordinatsystem
+  }
 
-
-if(!digitalRead(23) && padY != 44){ //Sjekker om joystick ned er aktiv //Fungerer ikke - stopper ikke
- padFart = 1; //Endrer fartsvariabel lokalt 
-}
+  if(!digitalRead(23) && padY != 44){ //Sjekker om joystick ned er aktiv
+    padFart = 1;                      //Endrer fartsvariabel lokalt 
+  }
 
   display.fillRect(padX, padY, 4, 20, BLACK);
   display.fillRect(padX, padY+padFart, 4, 20, WHITE);
@@ -78,39 +77,36 @@ if(!digitalRead(23) && padY != 44){ //Sjekker om joystick ned er aktiv //Fungere
 }
 
 void bevegPad2(int &pad2Y) {
-
-display.fillRect(pad2X, 44-pad2Y, 4, 20, BLACK); //Sletter gamle pad2
-display.fillRect(pad2X, 44-pad2Yoppdatert, 4, 20, WHITE); //Tegner ny pad2 fra canbus data
-pad2Y = pad2Yoppdatert;
+  display.fillRect(pad2X, 44-pad2Y, 4, 20, BLACK);          //Sletter gamle pad2
+  display.fillRect(pad2X, 44-pad2Yoppdatert, 4, 20, WHITE); //Tegner ny pad2 fra canbus data
+  pad2Y = pad2Yoppdatert;
 }
 
 void sprettY(float &yFartBall){
-yFartBall = -1*yFartBall;
+  yFartBall = -1 * yFartBall;
 }
 
 void sprettX(float &xFartBall){
-xFartBall = -1*xFartBall;
+  xFartBall = -1 * xFartBall;
 }
 
 void canSniff(const CAN_message_t &msg){
-if(msg.id==50){ //Ballposisjon
-xPosNy = msg.buf[0];
-yPosNy = msg.buf[1];
+  if(msg.id==50){               //Ballposisjon
+    xPosNy = msg.buf[0];
+    yPosNy = msg.buf[1];
+  }
+  else if(msg.id==30){           //gruppenummer + 10 - mottar paddleposisjon (motstanders paddle 1)
+    pad2Yoppdatert = msg.buf[0]; //Oversetter fra hexa automatisk
+  }
+  else if(msg.id==15){
+    startSpill = msg.buf[0];
+    masterState = msg.buf[1];
+  }
 }
-else if(msg.id==30){ //gruppenummer + 10 - mottar paddleposisjon (motstanders paddle 1)
-pad2Yoppdatert = msg.buf[0]; //Oversetter fra hexa automatisk
-}
-else if(msg.id==15){
-  startSpill = msg.buf[0];
-  masterState = msg.buf[1];
-}
-
-}
-
 
 void sendBallPos() {
   //Host funksjon
-  ballUt.id = 50; //Gruppenummer + 50
+  ballUt.id = 50;         //Gruppenummer + 50
   ballUt.len = 2;
   ballUt.buf[0] = xPos; 
   ballUt.buf[1] = yPos;
@@ -118,7 +114,7 @@ void sendBallPos() {
 }
 
 void sendPaddle1pos() {
-  paddle1Pos.id = 30; //Gruppenummer+20
+  paddle1Pos.id = 30;     //Gruppenummer+20
   paddle1Pos.len = 1;
   paddle1Pos.buf[0] = padY;
   can0.write(paddle1Pos);
@@ -126,45 +122,42 @@ void sendPaddle1pos() {
 
 void sjekkBallPosisjonOgSprett(){
 //HOST FUNKSJON  
-if (yPos > 63-ballRadius || yPos == 0+ballRadius)
-{
-  sprettY(yFartBall); //Snur y hastighet
-}
-if (xPos < 4+ballRadius && (yPos < 44-pad2Y+20 && yPos > 44-pad2Yoppdatert)) //Sjekker om ball treffer paddle2 (venstre)
-{
-  sprettX(xFartBall);
-}
-
-if (xPos > 127-4-ballRadius && (yPos < padY+20 && yPos > padY)) //Sjekker om ball treffer paddle1 (høyre)
-{
-  sprettX(xFartBall);
-}
-
+  if ( (yPos > (63-ballRadius)) || (yPos == (0+ballRadius)) ) // Upper & Lower bounds
+  {
+    sprettY(yFartBall); //Snur y hastighet
+  }
+  if ((xPos < (4+ballRadius)) &&           // Sjekker om ball treffer paddle2 (venstre)
+      ( (yPos < (44-pad2Y+20)) && (yPos > (44-pad2Yoppdatert)))) 
+  {
+    sprettX(xFartBall);
+  }
+  if ((xPos > (127-4-ballRadius)) && 
+      ((yPos < padY+20) && (yPos > padY))) // Sjekker om ball treffer paddle1 (høyre)
+  {
+    sprettX(xFartBall);
+  }
 }
 
 
 void ScoreSjekk(int xPos)
 {
   //Sjekker scoren
-
-
 }
 
 
 void setup() {
   can0.begin();
   can0.setBaudRate(250000);   
-  Serial.begin(9600); //Brukes bare til funksjonstesting
+  Serial.begin(9600);                  //Brukes bare til funksjonstesting
   display.begin(SSD1306_SWITCHCAPVCC); //Gir 3.3V til skjerm
   display.clearDisplay();
   display.setTextSize(0);
   display.setTextColor(WHITE);
   //Tegn startskjerm TBA
   display.display(); 
-  pinMode(JOY_DOWN, INPUT); //Setter joystick pins til å være input
+  pinMode(JOY_DOWN, INPUT);           //Setter joystick pins til å være input
   pinMode(JOY_UP, INPUT);
   pinMode(JOY_PRESS, INPUT);
-
 
   can0.enableFIFO();
   can0.enableFIFOInterrupt();
@@ -173,43 +166,37 @@ void setup() {
 
 void loop() {
 
-if(!digitalRead(19)) { //Hvis joystick presses
-startSpill = 1;
-masterState = 1;
-masterEllerSlave.id = 15;
-masterEllerSlave.len = 2;
-masterEllerSlave.buf[0] = 1; //Starter spill - buf[0] leser til startSpill variabel
-masterEllerSlave.buf[1] = 0; //Setter lokal maskin til master - motsatt maskin leser 0 og kjører slavesløyfe
-can0.write(masterEllerSlave);
-}
+  if(!digitalRead(19)) { //Hvis joystick presses
+    startSpill = 1;
+    masterState = 1;
+    masterEllerSlave.id = 15;
+    masterEllerSlave.len = 2;
+    masterEllerSlave.buf[0] = 1; //Starter spill - buf[0] leser til startSpill variabel
+    masterEllerSlave.buf[1] = 0; //Setter lokal maskin til master - motsatt maskin leser 0 og kjører slavesløyfe
+    can0.write(masterEllerSlave);
+  }
 
+  while(startSpill != 0) { 
+    bevegPad1(padY);    //Lokal pad bevegelse (høyre pad)
+    bevegPad2(pad2Y);   //Henter data fra motstander og beveger (venstre pad)
+    sendPaddle1pos();
 
-while(startSpill != 0) { 
+    if (masterState == 1) {
+      //Hvis master
+      sendBallPos();
+      bevegBallHost(xPos, yPos, xFartBall, yFartBall);
+      sjekkBallPosisjonOgSprett();
+    }
+    else if(masterState == 0){
+      //Hvis slave
+      bevegBallSlave(xPos, yPos);
+    }
 
-bevegPad1(padY); //Lokal pad bevegelse (høyre pad)
-bevegPad2(pad2Y); //Henter data fra motstander og beveger (venstre pad)
-sendPaddle1pos();
-
-if (masterState == 1) {
-  //Hvis master
-  sendBallPos();
-  bevegBallHost(xPos, yPos, xFartBall, yFartBall);
-  sjekkBallPosisjonOgSprett();
-}
-else if(masterState == 0){
-  //Hvis slave
-  bevegBallSlave(xPos, yPos);
-}
-
-
-
-can0.disableFIFOInterrupt(); //Stopper interrupts når skjermen tegnes
-display.display(); //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
-can0.enableFIFOInterrupt();
-delay(100); //10 Hz oppdateringsrate under testing
-}
-//Serial.println(__TIMESTAMP__); 
-
-
+    can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
+    display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
+    can0.enableFIFOInterrupt();
+    delay(60);                    // 60 Hz oppdateringsrate under testing
+  }
+  //Serial.println(__TIMESTAMP__); 
 }
 
