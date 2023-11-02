@@ -8,34 +8,41 @@
 #define OLED_RESET 5
 #define OLED_DC 6
 #define OLED_CS 10
-
-#define ballRadius 2
-
-#define padWidth = 4
-#define padHeight = 20
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
 
 #define JOY_UP 22
 #define JOY_DOWN 23
 #define JOY_PRESS 19
 
+#define ballRadius 2
 
-//Globale variabler 
+#define padWidth 4    // Pads har lokal origo i top venstre hjørne
+#define padHeight 20
+
+// -------------------- Globale variabler --------------------
+  // Ball
 float xFartBall = 1;
 float yFartBall = 1;
-float xPos = 64; //startPosisjon ball
-float yPos = 32; 
-int padX = 127-3; //startposisjon høyre pads (lokal pad) topp venstre hjørne
-int padY = 32-10;
-int xPosSlave = 127-64;
-int yPosSlave = 63-32; 
-int padFart = 0; 
+float xPos = OLED_WIDTH/2;          //startPosisjon ball
+float yPos = OLED_HEIGHT/2; 
 int xPosNy = 0;
 int yPosNy = 0;
-int pad2X = 0;
-int pad2Y = 32-10;
-int pad2Yoppdatert = 22;
+
+  // Paddles
+int padX = OLED_WIDTH - padWidth;  // Start pos høyre pad (lokal). 
+int padY = (OLED_HEIGHT - padHeight)/2;
+int pad2X = 0;                      // Start pos venstre pad
+int pad2Y = (OLED_HEIGHT - padHeight)/2;
+int pad2Yoppdatert = pad2Y;         // Starter samme, endres senere
+int xPosSlave = (OLED_WIDTH-1) - OLED_HEIGHT;
+int yPosSlave = OLED_HEIGHT/2 - 1;
+int padFart = 0;             // For JoyStick (pass-by-copy)
+
+  // Misc
 int masterState = 0;
 int startSpill = 0;
+// -------------------- Globale variabler --------------------
 
 Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
 FlexCAN_T4<CAN0, RX_SIZE_256, TX_SIZE_16> can0; //Starter can0
@@ -43,42 +50,39 @@ CAN_message_t ballUt;
 CAN_message_t paddle1Pos;
 CAN_message_t masterEllerSlave; //Buf[0] = 1 betyr start spill, buf[1] = 1 betyr at har master state
 
-// put function declarations here:
-
 //Hvis HOST
-
-void bevegBallHost(float &xPos, float &yPos, int xFartBall, int yFartBall){
-  display.fillCircle(xPos, yPos, 2, BLACK);  //Sletter gamle ballen
+void bevegBallHost(float &xPos, float &yPos, float xFartBall, float yFartBall){
+  display.fillCircle(xPos, yPos, 2, BLACK);  // Sletter gammel ball
   xPos = xPos + xFartBall;
   yPos = yPos + yFartBall;
-  display.fillCircle(xPos, yPos, 2, WHITE); //Tegner ny ball
+  display.fillCircle(xPos, yPos, 2, WHITE);  // Tegner ny ball
 }
 
 void bevegBallSlave(float &xPos, float &yPos){ //Speilvender ballposisjon
-  display.fillCircle(127-xPosSlave, 63-yPosSlave, 2, BLACK);
-  display.fillCircle(127-xPosNy, 63-yPosNy, 2, WHITE);
+  display.fillCircle((OLED_WIDTH-1)-xPosSlave, (OLED_HEIGHT-1)-yPosSlave, ballRadius, BLACK);
+  display.fillCircle((OLED_WIDTH-1)-xPosNy, (OLED_HEIGHT-1)-yPosNy, ballRadius, WHITE);
   xPosSlave = xPosNy; 
   yPosSlave = yPosNy;
 }
 
 void bevegPad1(int &padY){
-  if(!digitalRead(22) && padY != 0){  //Sjekker om joystick opp er aktiv
-    padFart = -1;                     //Opp ned koordinatsystem
+  if(!digitalRead(JOY_UP) && padY != 0){  // Sjekker om joystick opp er aktiv
+    padFart = -1;                         // Opp ned koordinatsystem
   }
 
-  if(!digitalRead(23) && padY != 44){ //Sjekker om joystick ned er aktiv
-    padFart = 1;                      //Endrer fartsvariabel lokalt 
+  if(!digitalRead(JOY_DOWN) && padY != (OLED_HEIGHT-padHeight)){ // Sjekker om joystick ned er aktiv
+    padFart = 1;                            // Endrer fartsvariabel lokalt 
   }
 
-  display.fillRect(padX, padY, 4, 20, BLACK);
-  display.fillRect(padX, padY+padFart, 4, 20, WHITE);
+  display.fillRect(padX, padY, padWidth, padHeight, BLACK);
+  display.fillRect(padX, padY+padFart, padWidth, padHeight, WHITE);
   padY = padY + padFart;
   padFart = 0;
 }
 
 void bevegPad2(int &pad2Y) {
-  display.fillRect(pad2X, 44-pad2Y, 4, 20, BLACK);          //Sletter gamle pad2
-  display.fillRect(pad2X, 44-pad2Yoppdatert, 4, 20, WHITE); //Tegner ny pad2 fra canbus data
+  display.fillRect(pad2X, (OLED_HEIGHT-padHeight)-pad2Y, padWidth, padHeight, BLACK);          //Sletter gamle pad2
+  display.fillRect(pad2X, (OLED_HEIGHT-padHeight)-pad2Yoppdatert, padWidth, padHeight, WHITE); //Tegner ny pad2 fra canbus data
   pad2Y = pad2Yoppdatert;
 }
 
@@ -91,12 +95,12 @@ void sprettX(float &xFartBall){
 }
 
 void canSniff(const CAN_message_t &msg){
-  if(msg.id==50){               //Ballposisjon
+  if(msg.id==50){               // Ballposisjon
     xPosNy = msg.buf[0];
     yPosNy = msg.buf[1];
   }
-  else if(msg.id==30){           //gruppenummer + 10 - mottar paddleposisjon (motstanders paddle 1)
-    pad2Yoppdatert = msg.buf[0]; //Oversetter fra hexa automatisk
+  else if(msg.id==30){           // Gruppenummer + 10 - mottar paddleposisjon (motstanders paddle 1)
+    pad2Yoppdatert = msg.buf[0]; // Oversetter fra hexa automatisk
   }
   else if(msg.id==15){
     startSpill = msg.buf[0];
@@ -122,17 +126,17 @@ void sendPaddle1pos() {
 
 void sjekkBallPosisjonOgSprett(){
 //HOST FUNKSJON  
-  if ( (yPos > (63-ballRadius)) || (yPos == (0+ballRadius)) ) // Upper & Lower bounds
+  if ( (yPos > ((OLED_HEIGHT-1)-ballRadius)) || (yPos == (0+ballRadius)) ) // Upper & Lower bounds
   {
     sprettY(yFartBall); //Snur y hastighet
   }
-  if ((xPos < (4+ballRadius)) &&           // Sjekker om ball treffer paddle2 (venstre)
-      ( (yPos < (44-pad2Y+20)) && (yPos > (44-pad2Yoppdatert)))) 
+  if ((xPos < (padWidth+ballRadius)) &&           // Sjekker om ball treffer paddle2 (venstre)
+      ( (yPos < (OLED_HEIGHT-pad2Y)) && (yPos > ((OLED_HEIGHT-padHeight)-pad2Yoppdatert)))) // Invertert
   {
     sprettX(xFartBall);
   }
-  if ((xPos > (127-4-ballRadius)) && 
-      ((yPos < padY+20) && (yPos > padY))) // Sjekker om ball treffer paddle1 (høyre)
+  if ((xPos > (((OLED_WIDTH-1)-padWidth)-ballRadius)) && 
+      ((yPos < (padY+padHeight)) && (yPos > padY))) // Sjekker om ball treffer paddle1 (høyre)
   {
     sprettX(xFartBall);
   }
@@ -195,7 +199,7 @@ void loop() {
     can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
     display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
     can0.enableFIFOInterrupt();
-    delay(60);                    // 60 Hz oppdateringsrate under testing
+    delay(10);                    // 60 Hz oppdateringsrate under testing
   }
   //Serial.println(__TIMESTAMP__); 
 }
