@@ -1,20 +1,22 @@
-// Written by K. M. Knausgård 2023-10-21
-
 #include <Arduino.h>
-#include <FlexCAN_T4.h>
+#include <FlexCAN_T4.h>   // FlexCAN Library
 #include <SPI.h>
 #include <Wire.h>
 #include <string.h>
 
 unsigned int meldingerSendt = 0;  // unsigned int so overflow goes to 0
 
+// ------ Inspired by K. M. Knausgård ------
 namespace {
-  CAN_message_t msg_tx;
+  CAN_message_t msg_tx;   // Transmit message
 
   FlexCAN_T4<CAN0, RX_SIZE_256, TX_SIZE_16> can0;
   //FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
 }
+// ------ Inspired by K. M. Knausgård ------
 
+
+  // canSniff section inspired by tonton81/FlexCAN_T4 on github
 // ========== Displaying receive and transmit ==========
 void canSniff_rx(const CAN_message_t &msg) { // Receive
   Serial.print("- Message received:   ");
