@@ -20,15 +20,15 @@
 
 
 //Globale variabler 
-int xFart = 1;
-int yFart = 1;
-int xPos = 64; //startPosisjon ball
-int yPos = 32; 
-int padX = 127-3; //startposisjon høyre pads topp venstre hjørne
+float xFartBall = 1;
+float yFartBall = 1;
+float xPos = 64; //startPosisjon ball
+float yPos = 32; 
+int padX = 127-3; //startposisjon høyre pads (lokal pad) topp venstre hjørne
 int padY = 32-10;
 int xPosSlave = 127-64;
 int yPosSlave = 63-32; 
-int padFart = 0;
+int padFart = 0; 
 int xPosNy = 0;
 int yPosNy = 0;
 int pad2X = 0;
@@ -47,14 +47,14 @@ CAN_message_t masterEllerSlave; //Buf[0] = 1 betyr start spill, buf[1] = 1 betyr
 
 //Hvis HOST
 
-void bevegBallHost(int &xPos, int &yPos, int xFart, int yFart){
+void bevegBallHost(float &xPos, float &yPos, int xFartBall, int yFartBall){
   display.fillCircle(xPos, yPos, 2, BLACK);  //Sletter gamle ballen
-  xPos = xPos + xFart;
-  yPos = yPos + yFart;
+  xPos = xPos + xFartBall;
+  yPos = yPos + yFartBall;
   display.fillCircle(xPos, yPos, 2, WHITE); //Tegner ny ball
 }
 
-void bevegBallSlave(int &xPos, int &yPos){ //Speilvender ballposisjon
+void bevegBallSlave(float &xPos, float &yPos){ //Speilvender ballposisjon
   display.fillCircle(127-xPosSlave, 63-yPosSlave, 2, BLACK);
   display.fillCircle(127-xPosNy, 63-yPosNy, 2, WHITE);
   xPosSlave = xPosNy; 
@@ -84,12 +84,12 @@ display.fillRect(pad2X, 44-pad2Yoppdatert, 4, 20, WHITE); //Tegner ny pad2 fra c
 pad2Y = pad2Yoppdatert;
 }
 
-void sprettY(int &yFart){
-yFart = -1*yFart;
+void sprettY(float &yFartBall){
+yFartBall = -1*yFartBall;
 }
 
-void sprettX(int &xFart){
-xFart = -1*xFart;
+void sprettX(float &xFartBall){
+xFartBall = -1*xFartBall;
 }
 
 void canSniff(const CAN_message_t &msg){
@@ -126,18 +126,18 @@ void sendPaddle1pos() {
 
 void sjekkBallPosisjonOgSprett(){
 //HOST FUNKSJON  
-if (yPos == 63-ballRadius || yPos == 0+ballRadius)
+if (yPos > 63-ballRadius || yPos == 0+ballRadius)
 {
-  sprettY(yFart); //Snur y hastighet
+  sprettY(yFartBall); //Snur y hastighet
 }
-if (xPos == 4+ballRadius && (yPos < 44-pad2Y+20 && yPos > 44-pad2Yoppdatert)) //Sjekker om ball treffer paddle2 (venstre)
+if (xPos < 4+ballRadius && (yPos < 44-pad2Y+20 && yPos > 44-pad2Yoppdatert)) //Sjekker om ball treffer paddle2 (venstre)
 {
-  sprettX(xFart);
+  sprettX(xFartBall);
 }
 
-if (xPos == 127-4-ballRadius && (yPos < padY+20 && yPos > padY)) //Sjekker om ball treffer paddle1 (høyre)
+if (xPos > 127-4-ballRadius && (yPos < padY+20 && yPos > padY)) //Sjekker om ball treffer paddle1 (høyre)
 {
-  sprettX(xFart);
+  sprettX(xFartBall);
 }
 
 }
@@ -160,7 +160,6 @@ void setup() {
   display.setTextSize(0);
   display.setTextColor(WHITE);
   //Tegn startskjerm TBA
-  //display.fillCircle(xPos, yPos, 256, WHITE); //Hvit bakgrunn
   display.display(); 
   pinMode(JOY_DOWN, INPUT); //Setter joystick pins til å være input
   pinMode(JOY_UP, INPUT);
@@ -194,7 +193,7 @@ sendPaddle1pos();
 if (masterState == 1) {
   //Hvis master
   sendBallPos();
-  bevegBallHost(xPos, yPos, xFart, yFart);
+  bevegBallHost(xPos, yPos, xFartBall, yFartBall);
   sjekkBallPosisjonOgSprett();
 }
 else if(masterState == 0){
