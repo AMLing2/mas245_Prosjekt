@@ -8,7 +8,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define OLED_DC 6 //Definerer LCD pins fra kortskjematikk
+#define OLED_DC 6 //Definerer LCD pins fra kortskjematikk - fra OLED test demo software
 #define OLED_CS 10 
 #define OLED_MOSI 11
 #define OLED_RESET 5
@@ -38,7 +38,7 @@ void setup() {
   can0.begin();
   can0.setBaudRate(250000);
 
-  display.begin(SSD1306_SWITCHCAPVCC); //Generate 3.3v
+  display.begin(SSD1306_SWITCHCAPVCC); //Generate 3.3v 
   display.clearDisplay();
  
   display.setTextSize(0);
@@ -58,7 +58,7 @@ void setup() {
 
   delay(500);
 
-  for(int i = 1; i < 129; i++)
+  for(int i = 1; i < 129; i++)    // Inspirert av K. M. Knausgård
     {
       display.drawLine((i-1),(5*std::sin((i-1)*(3.1415/128))+9), i,(5*std::sin((i-1)*(3.1415/128))+9), WHITE);
       display.display();
@@ -131,6 +131,3 @@ void canSniff(const CAN_message_t &msg) { //Kjører når en melding blir mottatt
   display.display(); //Sender alle endringer til skjermen
 
 }
-
-
-
