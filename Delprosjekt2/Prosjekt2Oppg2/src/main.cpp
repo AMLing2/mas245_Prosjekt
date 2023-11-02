@@ -6,17 +6,18 @@
 
 unsigned int meldingerSendt = 0;  // unsigned int so overflow goes to 0
 
-// ------ Inspired by K. M. Knausgård ------
+// ------ By K. M. Knausgård ------
 namespace {
   CAN_message_t msg_tx;   // Transmit message
 
   FlexCAN_T4<CAN0, RX_SIZE_256, TX_SIZE_16> can0;
   //FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
 }
-// ------ Inspired by K. M. Knausgård ------
+// ------ By K. M. Knausgård ------
 
 
-  // canSniff section inspired by tonton81/FlexCAN_T4 on github
+// canSniff function by tonton81/FlexCAN_T4 on github
+// https://github.com/tonton81/FlexCAN_T4/blob/master/README.md
 // ========== Displaying receive and transmit ==========
 void canSniff_rx(const CAN_message_t &msg) { // Receive
   Serial.print("- Message received:   ");
@@ -45,14 +46,11 @@ void canSniff_tx(const CAN_message_t &msg) { // Transmit
 // ========== Displaying receive and transmit ==========
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(9600); //For confirmation of received data
   can0.begin();
   can0.setBaudRate(250000);
-  //can1.begin();
-  //can1.setBaudRate(250000);
   can0.enableFIFO();
   can0.enableFIFOInterrupt();
-
   can0.onReceive(canSniff_rx);  // Received on Teensy from PCAN
   can0.onTransmit(canSniff_tx); // Transmitted from Teensy to PCAN
 }
