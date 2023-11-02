@@ -12,8 +12,10 @@
 #define OLED_CS 10 
 #define OLED_MOSI 11
 #define OLED_RESET 5
+#define OLED_HEIGHT 64
+#define OLED_WIDTH 128
 
-Adafruit_SSD1306 display(128,64, &SPI, 6, 5, 10); //Instantierer skjerm
+Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS); //Instantierer skjerm
 
 int meldingerSendt = 0;
 int canAntallCursorX = 0;
@@ -36,16 +38,13 @@ void setup() {
   can0.begin();
   can0.setBaudRate(250000);
 
-
-  
-
   display.begin(SSD1306_SWITCHCAPVCC); //Generate 3.3v
   display.clearDisplay();
  
   display.setTextSize(0);
   display.setTextColor(WHITE);
 
-  display.drawRoundRect(0 ,0, 128, 64, 5, WHITE); //Tegner rektangel
+  display.drawRoundRect(0 ,0, OLED_WIDTH, OLED_HEIGHT, 5, WHITE); //Tegner rektangel
   display.display(); //Sender endringer i RAM til skjerm
 
   //Print gruppenavn på midten av skjermen, med pause for dramatikk
@@ -53,7 +52,7 @@ void setup() {
   int16_t x1, y1;
   uint16_t w, h;
   display.getTextBounds("MAS245 - Gruppe 5", 0, 0, &x1, &y1, &w, &h); //Finner lengden på tittel og sender til w og h
-  display.setCursor(64-(w/2), 2); //Setter cursor midt på skjermen minus tekstlengde offset
+  display.setCursor(OLED_WIDTH/2 - (w/2), 2); //Setter cursor midt på skjermen minus tekstlengde offset. 2 pixler ned
   display.print("MAS245 - Gruppe 5");
   display.display();
 
@@ -65,7 +64,7 @@ void setup() {
       display.display();
       delay(10);
     }
-
+  //display.drawCircle(OLED_WIDTH/2,-500,513,WHITE);  // Tegne sirkel som går ned 13 piksler fra toppen.
 
 
   delay(500);
