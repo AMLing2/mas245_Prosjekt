@@ -31,13 +31,13 @@ int xPosNy = 0;
 int yPosNy = 0;
 
   // Paddles
-int padX = OLED_WIDTH - padWidth;  // Start pos høyre pad (lokal). 
+int padX = OLED_WIDTH - padWidth;  // Start pos høyre pad (lokal)
 float padY = (OLED_HEIGHT - padHeight)/2;
 int pad2X = 0;                      // Start pos venstre pad
-float pad2Y = (OLED_HEIGHT - padHeight)/2;
-int pad2Yoppdatert = pad2Y;         // Starter samme, endres senere
-int xPosSlave = (OLED_WIDTH-1) - OLED_HEIGHT;
-int yPosSlave = OLED_HEIGHT/2 - 1;
+float pad2Y = (OLED_HEIGHT - padHeight)/2;  // Lokal oppdatering
+float pad2Yoppdatert = pad2Y;                 // Fra CANbus ~ starter samme, endres senere
+float xPosSlave = (OLED_WIDTH-1) - OLED_HEIGHT;
+float yPosSlave = OLED_HEIGHT/2 - 1;
 float padFart = 0;             // For JoyStick (pass-by-copy)
 
 float padMid;   // Definert i sjekkBallPosisjonOgSprett()
@@ -95,10 +95,6 @@ void sprettY(float &yFartBall){
   yFartBall = -1 * yFartBall;
 }
 
-void sprettX(float &xFartBall){
-  xFartBall = -1 * xFartBall;
-}
-
 void sprettHorisontalt(float &xFartBall, float &yFartBall){ // Skalerer vektingen i x og y retning
   xFartBall = - ballMagnitude * cos(diffTheta);
   yFartBall =   ballMagnitude * sin(diffTheta);
@@ -141,18 +137,18 @@ void sjekkBallPosisjonOgSprett(){
     sprettY(yFartBall); //Snur y hastighet
   }
   if ((xPos < (padWidth+ballRadius)) &&           // Sjekker om ball treffer paddle2 (venstre)
-      ( (yPos < (OLED_HEIGHT-pad2Y)) && (yPos > ((OLED_HEIGHT-padHeight)-pad2Y)))) // Invertert
+      ( (yPos < (OLED_HEIGHT-(pad2Y-ballRadius))) && (yPos > (OLED_HEIGHT-(pad2Y+padHeight+ballRadius))))) // Invertert
   {
-    padMid = pad2Y + padHeight/2;
-    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);    // Differanse [radianer] fra -pi/3 til +pi/3
+    padMid = pad2Y + padHeight/2;   // Kanskje må endres hvis koordinatsystem er fucked her og
+    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2+ballRadius);    // Differanse [radianer] fra -pi/3 til +pi/3
     sprettHorisontalt(xFartBall, yFartBall);
     xFartBall *= -1;    // Gå til høyre, ikke venstre
   }
   if ((xPos > (padX-ballRadius)) && 
-      ((yPos < (padY+padHeight)) && (yPos > padY))) // Sjekker om ball treffer paddle1 (høyre)
+      ((yPos < (padY+padHeight+ballRadius)) && (yPos > (padY-ballRadius)))) // Sjekker om ball treffer paddle1 (høyre)
   {
     padMid = padY + padHeight/2;                       // Nullpunkt til pad
-    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);  // Differanse [radianer] fra -pi/3 til +pi/3
+    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2+ballRadius);  // Differanse [radianer] fra -pi/3 til +pi/3
     sprettHorisontalt(xFartBall, yFartBall);           // Trig bouncer
   }
   // -------------------------- Feilsøking --------------------------
@@ -193,6 +189,10 @@ void setup() {
 }
 
 void loop() {
+  
+  //while (startSpill == 0) {
+    // Add start screen here
+  //}
 
   if(!digitalRead(19)) { // Hvis joystick presses
     startSpill = 1;
