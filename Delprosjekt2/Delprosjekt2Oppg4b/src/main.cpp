@@ -64,8 +64,8 @@ void bevegBallHost(float &xPos, float &yPos, float xFartBall, float yFartBall){
 }
 
 void bevegBallSlave(float &xPos, float &yPos){ //Speilvender ballposisjon
-  display.fillCircle((OLED_WIDTH-1)-xPosSlave, (OLED_HEIGHT-1)-yPosSlave, ballRadius, BLACK);
-  display.fillCircle((OLED_WIDTH-1)-xPosNy, (OLED_HEIGHT-1)-yPosNy, ballRadius, WHITE);
+  display.fillCircle((OLED_WIDTH-1)-xPosSlave, yPosSlave, ballRadius, BLACK);
+  display.fillCircle((OLED_WIDTH-1)-xPosNy, yPosNy, ballRadius, WHITE);
   xPosSlave = xPosNy; 
   yPosSlave = yPosNy;
 }
@@ -86,8 +86,8 @@ void bevegPad1(float &padY){    // Sjekker input fra joystick, Opp ned koordinat
 }
 
 void bevegPad2(float &pad2Y) {
-  display.fillRect(pad2X, (OLED_HEIGHT-padHeight)-pad2Y, padWidth, padHeight, BLACK);          //Sletter gamle pad2
-  display.fillRect(pad2X, (OLED_HEIGHT-padHeight)-pad2Yoppdatert, padWidth, padHeight, WHITE); //Tegner ny pad2 fra canbus data
+  display.fillRect(pad2X, pad2Y, padWidth, padHeight, BLACK);          //Sletter gamle pad2
+  display.fillRect(pad2X, pad2Yoppdatert, padWidth, padHeight, WHITE); //Tegner ny pad2 fra canbus data
   pad2Y = pad2Yoppdatert;
 }
 
@@ -137,7 +137,7 @@ void sjekkBallPosisjonOgSprett(){
     sprettY(yFartBall); //Snur y hastighet
   }
   if ((xPos < (padWidth+ballRadius)) &&           // Sjekker om ball treffer paddle2 (venstre)
-      ( (yPos < (OLED_HEIGHT-(pad2Y-ballRadius))) && (yPos > (OLED_HEIGHT-(pad2Y+padHeight+ballRadius))))) // Invertert
+      ( (yPos < (pad2Y+padHeight+ballRadius)) && (yPos > (pad2Y-ballRadius))))
   {
     padMid = pad2Y + padHeight/2;   // Kanskje må endres hvis koordinatsystem er fucked her og
     diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2+ballRadius);    // Differanse [radianer] fra -pi/3 til +pi/3
@@ -154,8 +154,8 @@ void sjekkBallPosisjonOgSprett(){
   // -------------------------- Feilsøking --------------------------
   //Serial.print("   padMid: "); Serial.print(padMid);
   //Serial.print(" | diffTheta: "); Serial.print(diffTheta);
-  Serial.print("   pad2 top: "); Serial.print((OLED_HEIGHT-pad2Y));
-  Serial.print(" | pad2 bot: "); Serial.print(((OLED_HEIGHT-padHeight)-pad2Y));
+  Serial.print("   pad2 top: "); Serial.print(pad2Y);
+  Serial.print(" | pad2 bot: "); Serial.print((pad2Y+padHeight));
   Serial.print(" | Ball x: "); Serial.print(xPos); 
   Serial.print(" | Ball y: "); Serial.println(yPos); 
   // Serial.print(" | xFartBall: "); Serial.print(xFartBall);
@@ -167,7 +167,6 @@ void ScoreSjekk(int xPos)
 {
   //Sjekker scoren
 }
-
 
 void setup() {
   can0.begin();
