@@ -23,8 +23,8 @@
 
 // -------------------- Globale variabler --------------------
   // Ball
-float xFartBall = .5;   // Minimum .5, less than that will round down
-float yFartBall = .5;
+float xFartBall = 1.0;
+float yFartBall = 1.0;
 float xPos = OLED_WIDTH/2.0;          //startPosisjon ball
 float yPos = OLED_HEIGHT/2.0; 
 int xPosNy = 0;
@@ -32,16 +32,17 @@ int yPosNy = 0;
 
   // Paddles
 int padX = OLED_WIDTH - padWidth;  // Start pos høyre pad (lokal). 
-int padY = (OLED_HEIGHT - padHeight)/2;
+float padY = (OLED_HEIGHT - padHeight)/2;
 int pad2X = 0;                      // Start pos venstre pad
-int pad2Y = (OLED_HEIGHT - padHeight)/2;
+float pad2Y = (OLED_HEIGHT - padHeight)/2;
 int pad2Yoppdatert = pad2Y;         // Starter samme, endres senere
 int xPosSlave = (OLED_WIDTH-1) - OLED_HEIGHT;
 int yPosSlave = OLED_HEIGHT/2 - 1;
-int padFart = 0;             // For JoyStick (pass-by-copy)
+float padFart = 0;             // For JoyStick (pass-by-copy)
 
 float padMid;   // Definert i sjekkBallPosisjonOgSprett()
-float diff;
+float diffTheta;
+float ballMagnitude = 1.0;  // Lengden av fartvektoren.
 
   // Misc
 int masterState = 0;
@@ -69,19 +70,19 @@ void bevegBallSlave(float &xPos, float &yPos){ //Speilvender ballposisjon
   yPosSlave = yPosNy;
 }
 
-void bevegPad1(int &padY){
-  if(!digitalRead(JOY_UP) && padY != 0){  // Sjekker om joystick opp er aktiv
-    padFart = -1;                         // Opp ned koordinatsystem
+void bevegPad1(float &padY){    // Sjekker input fra joystick, Opp ned koordinatsystem
+  if(!digitalRead(JOY_UP) && padY != 0){  // Joystick opp aktiv?
+    padFart = -1;
   }
 
-  if(!digitalRead(JOY_DOWN) && padY != (OLED_HEIGHT-padHeight)){ // Sjekker om joystick ned er aktiv
-    padFart = 1;                            // Endrer fartsvariabel lokalt 
+  if(!digitalRead(JOY_DOWN) && padY != (OLED_HEIGHT-padHeight)){ // Joystick ned aktiv?
+    padFart = 1;
   }
 
-  display.fillRect(padX, padY, padWidth, padHeight, BLACK);
-  display.fillRect(padX, padY+padFart, padWidth, padHeight, WHITE);
-  padY = padY + padFart;
-  padFart = 0;
+  display.fillRect(padX, padY, padWidth, padHeight, BLACK);         // Fjern gammel pad
+  display.fillRect(padX, padY+padFart, padWidth, padHeight, WHITE); // Tegn ny pad
+  padY = padY + padFart;    // Oppdater neste posisjon
+  padFart = 0;              // Reset input sjekk
 }
 
 void bevegPad2(int &pad2Y) {
@@ -98,13 +99,9 @@ void sprettX(float &xFartBall){
   xFartBall = -1 * xFartBall;
 }
 
-void rescaleXY(float &xFartBall, float &yFartBall){
-  xFartBall *= (diff);
-  yFartBall *= (1-diff);
-  if (xFartBall > 1.0)
-  { xFartBall = 1.0;}
-  if (yFartBall > 1.0)
-  { yFartBall = 1.0;}
+void rescaleXY(float &xFartBall, float &yFartBall){ // Skalerer vektingen i x og y retning
+  xFartBall = - ballMagnitude * cos(diffTheta);
+  yFartBall =   ballMagnitude * sin(diffTheta);
 }
 
 void canSniff(const CAN_message_t &msg){
@@ -139,26 +136,30 @@ void sendPaddle1pos() {
 
 void sjekkBallPosisjonOgSprett(){
 //HOST FUNKSJON  
-  if ( (yPos > ((OLED_HEIGHT-1)-ballRadius)) || (yPos == (0+ballRadius)) ) // Upper & Lower bounds
+  if ( (yPos > ((OLED_HEIGHT-1)-ballRadius)) || (yPos < (0+ballRadius)) ) // Upper & Lower bounds
   {
     sprettY(yFartBall); //Snur y hastighet
   }
   if ((xPos < (padWidth+ballRadius)) &&           // Sjekker om ball treffer paddle2 (venstre)
       ( (yPos < (OLED_HEIGHT-pad2Y)) && (yPos > ((OLED_HEIGHT-padHeight)-pad2Y)))) // Invertert
   {
-    padMid = pad2Y - padHeight/2;
-    diff = (yPos - padMid)/(padHeight/2);
+    padMid = pad2Y + padHeight/2;
+    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);    // Differanse [radianer] fra -pi/3 til +pi/3
     rescaleXY(xFartBall, yFartBall);
-    sprettX(xFartBall);
+    //sprettX(xFartBall);
   }
   if ((xPos > (padX-ballRadius)) && 
       ((yPos < (padY+padHeight)) && (yPos > padY))) // Sjekker om ball treffer paddle1 (høyre)
   {
-    padMid = padY - padHeight/2;
-    diff = (yPos - padMid)/(padHeight/2)/2;   // Divided by 2 so it's from -.5 to +.5
+    padMid = padY + padHeight/2;
+    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);    // Differanse [radianer] fra -pi/3 til +pi/3
     rescaleXY(xFartBall, yFartBall);
-    sprettX(xFartBall);
+    //sprettX(xFartBall);
   }
+  Serial.print("   padMid: "); Serial.print(padMid);
+  Serial.print(" | diffTheta: "); Serial.print(diffTheta);
+  Serial.print(" | xFartBall: "); Serial.print(xFartBall);
+  Serial.print(" | yFartBall: "); Serial.println(yFartBall);
 }
 
 
@@ -218,7 +219,7 @@ void loop() {
     can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
     display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
     can0.enableFIFOInterrupt();
-    delay(10);                    // 60 Hz oppdateringsrate under testing
+    delay(60);                    // 60 Hz oppdateringsrate under testing
   }
   //Serial.println(__TIMESTAMP__); 
 }
