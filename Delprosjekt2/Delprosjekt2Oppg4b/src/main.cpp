@@ -23,8 +23,8 @@
 
 // -------------------- Globale variabler --------------------
   // Ball
-float xFartBall = 1.0;
-float yFartBall = 1.0;
+float xFartBall = -1.0;
+float yFartBall = 0.0;
 float xPos = OLED_WIDTH/2.0;          //startPosisjon ball
 float yPos = OLED_HEIGHT/2.0; 
 int xPosNy = 0;
@@ -85,7 +85,7 @@ void bevegPad1(float &padY){    // Sjekker input fra joystick, Opp ned koordinat
   padFart = 0;              // Reset input sjekk
 }
 
-void bevegPad2(int &pad2Y) {
+void bevegPad2(float &pad2Y) {
   display.fillRect(pad2X, (OLED_HEIGHT-padHeight)-pad2Y, padWidth, padHeight, BLACK);          //Sletter gamle pad2
   display.fillRect(pad2X, (OLED_HEIGHT-padHeight)-pad2Yoppdatert, padWidth, padHeight, WHITE); //Tegner ny pad2 fra canbus data
   pad2Y = pad2Yoppdatert;
@@ -99,7 +99,7 @@ void sprettX(float &xFartBall){
   xFartBall = -1 * xFartBall;
 }
 
-void rescaleXY(float &xFartBall, float &yFartBall){ // Skalerer vektingen i x og y retning
+void sprettHorisontalt(float &xFartBall, float &yFartBall){ // Skalerer vektingen i x og y retning
   xFartBall = - ballMagnitude * cos(diffTheta);
   yFartBall =   ballMagnitude * sin(diffTheta);
 }
@@ -145,23 +145,27 @@ void sjekkBallPosisjonOgSprett(){
   {
     padMid = pad2Y + padHeight/2;
     diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);    // Differanse [radianer] fra -pi/3 til +pi/3
-    rescaleXY(xFartBall, yFartBall);
-    //sprettX(xFartBall);
+    sprettHorisontalt(xFartBall, yFartBall);
+    xFartBall *= -1;    // Gå til høyre, ikke venstre
   }
   if ((xPos > (padX-ballRadius)) && 
       ((yPos < (padY+padHeight)) && (yPos > padY))) // Sjekker om ball treffer paddle1 (høyre)
   {
-    padMid = padY + padHeight/2;
-    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);    // Differanse [radianer] fra -pi/3 til +pi/3
-    rescaleXY(xFartBall, yFartBall);
-    //sprettX(xFartBall);
+    padMid = padY + padHeight/2;                       // Nullpunkt til pad
+    diffTheta = (yPos - padMid)*(PI/3)/(padHeight/2);  // Differanse [radianer] fra -pi/3 til +pi/3
+    sprettHorisontalt(xFartBall, yFartBall);           // Trig bouncer
   }
-  Serial.print("   padMid: "); Serial.print(padMid);
-  Serial.print(" | diffTheta: "); Serial.print(diffTheta);
-  Serial.print(" | xFartBall: "); Serial.print(xFartBall);
-  Serial.print(" | yFartBall: "); Serial.println(yFartBall);
+  // -------------------------- Feilsøking --------------------------
+  //Serial.print("   padMid: "); Serial.print(padMid);
+  //Serial.print(" | diffTheta: "); Serial.print(diffTheta);
+  Serial.print("   pad2 top: "); Serial.print((OLED_HEIGHT-pad2Y));
+  Serial.print(" | pad2 bot: "); Serial.print(((OLED_HEIGHT-padHeight)-pad2Y));
+  Serial.print(" | Ball x: "); Serial.print(xPos); 
+  Serial.print(" | Ball y: "); Serial.println(yPos); 
+  // Serial.print(" | xFartBall: "); Serial.print(xFartBall);
+  // Serial.print(" | yFartBall: "); Serial.println(yFartBall);
+  // -------------------------- Feilsøking --------------------------
 }
-
 
 void ScoreSjekk(int xPos)
 {
