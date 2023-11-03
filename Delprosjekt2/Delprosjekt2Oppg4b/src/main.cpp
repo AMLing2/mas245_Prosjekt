@@ -20,6 +20,8 @@
 
 #define padWidth 4.0    // Pads har lokal origo i top venstre hjørne
 #define padHeight 20.0
+#define scoreBoxH 8
+#define scoreBoxW 35
 
 // -------------------- Globale variabler --------------------
   // Ball
@@ -45,8 +47,16 @@ float diffTheta;
 float ballMagnitude = 1.0;  // Lengden av fartvektoren.
 
   // Misc
-int masterState = 0;
-int startSpill = 0;
+bool masterState = false;
+bool startSpill = false;
+
+  // Score stuff
+int hostScoreCursorX = 0;
+int hostScoreCursorY = 0;
+int hostScore = 0;
+int slaveScoreCursorX = 0;
+int slaveScoreCursorY = 0;
+int slaveScore = 0;
 // -------------------- Globale variabler --------------------
 
 Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
@@ -54,6 +64,7 @@ FlexCAN_T4<CAN0, RX_SIZE_256, TX_SIZE_16> can0; //Starter can0
 CAN_message_t ballUt;
 CAN_message_t paddle1Pos;
 CAN_message_t masterEllerSlave; //Buf[0] = 1 betyr start spill, buf[1] = 1 betyr at har master state
+CAN_message_t score;
 
 //Hvis HOST
 void bevegBallHost(float &xPos, float &yPos, float xFartBall, float yFartBall){
@@ -100,17 +111,21 @@ void sprettHorisontalt(float &xFartBall, float &yFartBall){ // Skalerer vektinge
   yFartBall =   ballMagnitude * sin(diffTheta);
 }
 
-void canSniff(const CAN_message_t &msg){
-  if(msg.id==50){               // Ballposisjon
+void canSniff(const CAN_message_t &msg){    // KUN for receiving
+  if (msg.id == 50){               // Ballposisjon
     xPosNy = msg.buf[0];
     yPosNy = msg.buf[1];
   }
-  else if(msg.id==30){           // Gruppenummer + 10 - mottar paddleposisjon (motstanders paddle 1)
-    pad2Yoppdatert = msg.buf[0]; // Oversetter fra hexa automatisk
+  else if (msg.id == 30){           // Gruppenummer + 10 - mottar paddleposisjon (motstanders paddle 1)
+    pad2Yoppdatert = msg.buf[0];      // Oversetter fra hexa automatisk
   }
-  else if(msg.id==15){
+  else if (msg.id == 15){
     startSpill = msg.buf[0];
     masterState = msg.buf[1];
+  }
+  else if (msg.id == 10){     // Score
+    hostScore = msg.buf[0];
+    slaveScore = msg.buf[1];
   }
 }
 
@@ -128,6 +143,15 @@ void sendPaddle1pos() {
   paddle1Pos.len = 1;
   paddle1Pos.buf[0] = padY;
   can0.write(paddle1Pos);
+}
+
+void sendScore(int hostScore, int slaveScore) {
+  //Host funksjon
+  score.id = 10;
+  score.len = 2;
+  score.buf[0] = slaveScore;  // Invertert til motstander
+  score.buf[1] = hostScore;
+  can0.write(score);
 }
 
 void sjekkBallPosisjonOgSprett(){
@@ -154,8 +178,8 @@ void sjekkBallPosisjonOgSprett(){
   // -------------------------- Feilsøking --------------------------
   //Serial.print("   padMid: "); Serial.print(padMid);
   //Serial.print(" | diffTheta: "); Serial.print(diffTheta);
-  Serial.print("   pad2 top: "); Serial.print(pad2Y);
-  Serial.print(" | pad2 bot: "); Serial.print((pad2Y+padHeight));
+  Serial.print("   pad1 (top): "); Serial.print(padY);
+  Serial.print(" | pad2 (top): "); Serial.print(pad2Y);
   Serial.print(" | Ball x: "); Serial.print(xPos); 
   Serial.print(" | Ball y: "); Serial.println(yPos); 
   // Serial.print(" | xFartBall: "); Serial.print(xFartBall);
@@ -163,9 +187,50 @@ void sjekkBallPosisjonOgSprett(){
   // -------------------------- Feilsøking --------------------------
 }
 
-void ScoreSjekk(int xPos)
+void startScreen(){
+    // TBA
+}
+
+void Score(int xPos)
 {
-  //Sjekker scoren
+    // Display slave score
+  //display.setCursor(slaveScoreCursorX, slaveScoreCursorY); 
+  display.fillRect(slaveScoreCursorX, slaveScoreCursorY, 20, 7, BLACK); //Sletter hva enn som stod her tidligere
+  display.setCursor(slaveScoreCursorX, slaveScoreCursorY);
+  display.print(slaveScore);
+
+    // Display host score
+  //display.setCursor(hostScoreCursorX, hostScoreCursorY); 
+  display.fillRect(hostScoreCursorX, hostScoreCursorY, 20, 7, BLACK); //Sletter hva enn som stod her tidligere
+  display.setCursor(hostScoreCursorX, hostScoreCursorY);
+  display.print(hostScore);
+}
+
+void resetGame(){
+  display.clearDisplay();
+  xPos = OLED_WIDTH/2.0;          //startPosisjon ball
+  yPos = OLED_HEIGHT/2.0; 
+  padY = (OLED_HEIGHT - padHeight)/2;
+  pad2Y = (OLED_HEIGHT - padHeight)/2;  // Lokal oppdatering
+  pad2Yoppdatert = pad2Y;
+}
+
+void gameOver(){
+  //slaveScore = (xPos < 0) ? slaveScore++ : slaveScore;
+  if ((xPos < 0)){
+    slaveScore++;
+    delay(500);
+    resetGame();
+    xFartBall = 0.5;
+    yFartBall = 0.5;
+  }
+  else if (xPos > OLED_WIDTH){
+    hostScore++;
+    delay(500);
+    resetGame();
+    xFartBall = -0.5;
+    yFartBall = 0.5;
+  }
 }
 
 void setup() {
@@ -188,14 +253,10 @@ void setup() {
 }
 
 void loop() {
-  
-  //while (startSpill == 0) {
-    // Add start screen here
-  //}
 
-  if(!digitalRead(19)) { // Hvis joystick presses
-    startSpill = 1;
-    masterState = 1;
+  if(!digitalRead(JOY_PRESS)) { // Hvis joystick presses
+    startSpill = true;
+    masterState = true;
     masterEllerSlave.id = 15;
     masterEllerSlave.len = 2;
     masterEllerSlave.buf[0] = 1; // Starter spill - buf[0] leser til startSpill variabel
@@ -203,21 +264,35 @@ void loop() {
     can0.write(masterEllerSlave);
   }
 
-  while(startSpill != 0) { 
+  while (!startSpill) {
+     startScreen();
+  }
+
+  while(startSpill) { 
     bevegPad1(padY);    // Lokal pad bevegelse (høyre pad)
     bevegPad2(pad2Y);   // Henter data fra motstander og beveger (venstre pad)
     sendPaddle1pos();
 
-    if (masterState == 1) {
+    if (masterState) {
       //Hvis master
       sendBallPos();
       bevegBallHost(xPos, yPos, xFartBall, yFartBall);
       sjekkBallPosisjonOgSprett();
+      gameOver();
+      sendScore(hostScore, slaveScore);
     }
-    else if(masterState == 0){
+    else if(!masterState){
       //Hvis slave
       bevegBallSlave(xPos, yPos);
     }
+
+    // --------------------------- Score stuff --------------------------------
+    display.fillRect((OLED_WIDTH-scoreBoxW)/2, 0, scoreBoxW, scoreBoxH, WHITE);
+    display.fillRect((OLED_WIDTH-scoreBoxW)/2+1, 1, scoreBoxW-2, scoreBoxH-2, BLACK);
+    display.setCursor((OLED_WIDTH/2-3), 0); // Middle minus 5 pixels (width of "-")
+    display.print("-");
+    //score();
+    // --------------------------- Score stuff --------------------------------
 
     can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
     display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
