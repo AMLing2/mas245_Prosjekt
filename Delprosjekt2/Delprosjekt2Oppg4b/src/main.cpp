@@ -20,8 +20,8 @@
 
 #define padWidth 4.0    // Pads har lokal origo i top venstre hjørne
 #define padHeight 20.0
-#define scoreBoxH 8
-#define scoreBoxW 35
+#define scoreBoxH 11
+#define scoreBoxW 48
 
 // -------------------- Globale variabler --------------------
   // Ball
@@ -51,12 +51,10 @@ bool masterState = false;
 bool startSpill = false;
 
   // Score stuff
-int hostScoreCursorX = 0;
-int hostScoreCursorY = 0;
-int hostScore = 0;
-int slaveScoreCursorX = 0;
-int slaveScoreCursorY = 0;
-int slaveScore = 0;
+int cursorX = 0;
+int cursorY = 0;
+int hostScore = 10;
+int slaveScore = 10;
 // -------------------- Globale variabler --------------------
 
 Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
@@ -191,21 +189,6 @@ void startScreen(){
     // TBA
 }
 
-void Score(int xPos)
-{
-    // Display slave score
-  //display.setCursor(slaveScoreCursorX, slaveScoreCursorY); 
-  display.fillRect(slaveScoreCursorX, slaveScoreCursorY, 20, 7, BLACK); //Sletter hva enn som stod her tidligere
-  display.setCursor(slaveScoreCursorX, slaveScoreCursorY);
-  display.print(slaveScore);
-
-    // Display host score
-  //display.setCursor(hostScoreCursorX, hostScoreCursorY); 
-  display.fillRect(hostScoreCursorX, hostScoreCursorY, 20, 7, BLACK); //Sletter hva enn som stod her tidligere
-  display.setCursor(hostScoreCursorX, hostScoreCursorY);
-  display.print(hostScore);
-}
-
 void resetGame(){
   display.clearDisplay();
   xPos = OLED_WIDTH/2.0;          //startPosisjon ball
@@ -218,14 +201,14 @@ void resetGame(){
 void gameOver(){
   //slaveScore = (xPos < 0) ? slaveScore++ : slaveScore;
   if ((xPos < 0)){
-    slaveScore++;
+    hostScore++;
     delay(500);
     resetGame();
     xFartBall = 0.5;
     yFartBall = 0.5;
   }
   else if (xPos > OLED_WIDTH){
-    hostScore++;
+    slaveScore++;
     delay(500);
     resetGame();
     xFartBall = -0.5;
@@ -286,13 +269,23 @@ void loop() {
       bevegBallSlave(xPos, yPos);
     }
 
-    // --------------------------- Score stuff --------------------------------
-    display.fillRect((OLED_WIDTH-scoreBoxW)/2, 0, scoreBoxW, scoreBoxH, WHITE);
-    display.fillRect((OLED_WIDTH-scoreBoxW)/2+1, 1, scoreBoxW-2, scoreBoxH-2, BLACK);
-    display.setCursor((OLED_WIDTH/2-3), 0); // Middle minus 5 pixels (width of "-")
-    display.print("-");
-    //score();
-    // --------------------------- Score stuff --------------------------------
+    // --------------------------- Score display --------------------------------
+    cursorX = (OLED_WIDTH-scoreBoxW)/2;   // Ny cursorX: svart boks + 1
+    cursorY = 0;                            // Ny cursorY: svart boks + 1
+
+    display.fillRect(cursorX, cursorY, scoreBoxW, scoreBoxH, WHITE);       // Hvit boks
+    display.fillRect((cursorX+1), (cursorY+1), scoreBoxW-2, scoreBoxH-2, BLACK); // Svart boks
+
+    cursorX = cursorX + 3;
+    cursorY = cursorY + 2;
+    
+    display.setCursor(cursorX, cursorY);
+    display.print(slaveScore);
+    display.print(" - ");
+    display.print(hostScore);
+    //display.setCursor((OLED_WIDTH/2-3), 0); // Middle minus 5 pixels (width of "-")
+    //display.print("-");
+    // --------------------------- Score display --------------------------------
 
     can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
     display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
