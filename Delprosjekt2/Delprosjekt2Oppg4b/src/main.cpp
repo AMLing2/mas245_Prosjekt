@@ -21,11 +21,15 @@
 #define padWidth 4.0    // Pads har lokal origo i top venstre hjørne
 #define padHeight 20.0
 #define scoreBoxH 11
-#define scoreBoxW 48
+#define scoreBoxW 35
+#define scoreBoxRadius 3
+
+#define periode 10      // Bruker lavere frekvens ved testing. frekvens = periode^-1 [Hz]
+#define winScore 10
 
 // -------------------- Globale variabler --------------------
   // Ball
-float xFartBall = -1.0;
+float xFartBall = 0.0;
 float yFartBall = 0.0;
 float xPos = OLED_WIDTH/2.0;          //startPosisjon ball
 float yPos = OLED_HEIGHT/2.0; 
@@ -48,13 +52,15 @@ float ballMagnitude = 1.0;  // Lengden av fartvektoren.
 
   // Misc
 bool masterState = false;
-bool startSpill = false;
-
-  // Score stuff
-int cursorX = 0;
-int cursorY = 0;
-int hostScore = 10;
-int slaveScore = 10;
+int startSpill = 0;       // 0 = start Screen, 1 = game on, 2 = game finished
+int16_t X, Y;
+uint16_t W, H;
+int16_t cursorX = OLED_WIDTH/2;               // Middle
+int16_t cursorY = 0;                          // Top
+int16_t scoreCursorX = cursorX - scoreBoxW/2;
+int hostScore = 9;
+int slaveScore = 9;
+float t = 0.0;
 // -------------------- Globale variabler --------------------
 
 Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
@@ -66,14 +72,14 @@ CAN_message_t score;
 
 //Hvis HOST
 void bevegBallHost(float &xPos, float &yPos, float xFartBall, float yFartBall){
-  display.fillCircle(xPos, yPos, ballRadius, BLACK);  // Sletter gammel ball
+  //display.fillCircle(xPos, yPos, ballRadius, BLACK);  // Sletter gammel ball
   xPos = xPos + xFartBall;
   yPos = yPos + yFartBall;
   display.fillCircle(xPos, yPos, ballRadius, WHITE);  // Tegner ny ball
 }
 
 void bevegBallSlave(float &xPos, float &yPos){ //Speilvender ballposisjon
-  display.fillCircle((OLED_WIDTH-1)-xPosSlave, yPosSlave, ballRadius, BLACK);
+  //display.fillCircle((OLED_WIDTH-1)-xPosSlave, yPosSlave, ballRadius, BLACK);
   display.fillCircle((OLED_WIDTH-1)-xPosNy, yPosNy, ballRadius, WHITE);
   xPosSlave = xPosNy; 
   yPosSlave = yPosNy;
@@ -88,14 +94,14 @@ void bevegPad1(float &padY){    // Sjekker input fra joystick, Opp ned koordinat
     padFart = 1;
   }
 
-  display.fillRect(padX, padY, padWidth, padHeight, BLACK);         // Fjern gammel pad
+  //display.fillRect(padX, padY, padWidth, padHeight, BLACK);         // Fjern gammel pad
   display.fillRect(padX, padY+padFart, padWidth, padHeight, WHITE); // Tegn ny pad
   padY = padY + padFart;    // Oppdater neste posisjon
   padFart = 0;              // Reset input sjekk
 }
 
 void bevegPad2(float &pad2Y) {
-  display.fillRect(pad2X, pad2Y, padWidth, padHeight, BLACK);          //Sletter gamle pad2
+  //display.fillRect(pad2X, pad2Y, padWidth, padHeight, BLACK);          //Sletter gamle pad2
   display.fillRect(pad2X, pad2Yoppdatert, padWidth, padHeight, WHITE); //Tegner ny pad2 fra canbus data
   pad2Y = pad2Yoppdatert;
 }
@@ -185,10 +191,6 @@ void sjekkBallPosisjonOgSprett(){
   // -------------------------- Feilsøking --------------------------
 }
 
-void startScreen(){
-    // TBA
-}
-
 void resetGame(){
   display.clearDisplay();
   xPos = OLED_WIDTH/2.0;          //startPosisjon ball
@@ -237,21 +239,62 @@ void setup() {
 
 void loop() {
 
-  if(!digitalRead(JOY_PRESS)) { // Hvis joystick presses
-    startSpill = true;
+  // ========================================== START SCREEN ==========================================
+  while (startSpill == 0) {
+      // Tittel
+    display.setTextSize(2);
+    display.getTextBounds("PONG!", cursorX, cursorY, &X, &Y, &W, &H);
+    display.setCursor((cursorX-W/2), (cursorY+2));
+    display.print("PONG!");
+      // Svevende Ball
+    yFartBall = sin(2*PI*t);
+    //xFartBall = cos(t);
+    display.fillCircle(xPos, yPos, (ballRadius+1), BLACK);  // Sletter gammel ball
+    yPos = yPos + yFartBall;
+    //xPos = xPos + xFartBall;
+    display.fillCircle(xPos, yPos, (ballRadius+1), WHITE);  // Tegner ny ball
+
+      // tekst
+    display.setTextSize(0);
+    display.getTextBounds("START: Trykk joystick", cursorX, cursorY, &X, &Y, &W, &H);
+    display.setCursor((cursorX-W/2), (OLED_HEIGHT - 10));
+    display.print("START: Trykk joystick");
+
+    display.setCursor(1, 1);
+    display.print("Gr.5");
+    display.getTextBounds("2023", cursorX, cursorY, &X, &Y, &W, &H);
+    display.setCursor((OLED_WIDTH-W), 1);
+    display.print("2023");
+
+    //display.getTextBounds("2023", cursorX, cursorY, &X, &Y, &W, &H);
+    //display.setCursor((OLED_WIDTH-W-1), (OLED_HEIGHT-1));
+    //display.print("2023");
+
+
+    can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
+    display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
+    can0.enableFIFOInterrupt();
+    delay(periode); 
+    t += 0.05;
+
+    if(!digitalRead(JOY_PRESS)) { // Hvis joystick presses
+    startSpill = 1;
     masterState = true;
     masterEllerSlave.id = 15;
     masterEllerSlave.len = 2;
     masterEllerSlave.buf[0] = 1; // Starter spill - buf[0] leser til startSpill variabel
     masterEllerSlave.buf[1] = 0; // Setter lokal maskin til master - motsatt maskin leser 0 og kjører slavesløyfe
     can0.write(masterEllerSlave);
+    xFartBall = 0.5;
+    yFartBall = 0.5;
+    //display.display();
   }
-
-  while (!startSpill) {
-     startScreen();
   }
+  // ========================================== START SCREEN ==========================================
 
-  while(startSpill) { 
+  // ========================================== GAME SCREEN ==========================================
+  while(startSpill == 1) {  // Game on
+    display.clearDisplay();
     bevegPad1(padY);    // Lokal pad bevegelse (høyre pad)
     bevegPad2(pad2Y);   // Henter data fra motstander og beveger (venstre pad)
     sendPaddle1pos();
@@ -270,16 +313,10 @@ void loop() {
     }
 
     // --------------------------- Score display --------------------------------
-    cursorX = (OLED_WIDTH-scoreBoxW)/2;   // Ny cursorX: svart boks + 1
-    cursorY = 0;                            // Ny cursorY: svart boks + 1
-
-    display.fillRect(cursorX, cursorY, scoreBoxW, scoreBoxH, WHITE);       // Hvit boks
-    display.fillRect((cursorX+1), (cursorY+1), scoreBoxW-2, scoreBoxH-2, BLACK); // Svart boks
-
-    cursorX = cursorX + 3;
-    cursorY = cursorY + 2;
+    display.drawRoundRect(scoreCursorX, cursorY, scoreBoxW, scoreBoxH, scoreBoxRadius, WHITE);       // Hvit boks
+    display.drawRoundRect((scoreCursorX+1), (cursorY+1), scoreBoxW-2, scoreBoxH-2, scoreBoxRadius, BLACK); // Svart boks
     
-    display.setCursor(cursorX, cursorY);
+    display.setCursor((scoreCursorX+3), (cursorY+2));
     display.print(slaveScore);
     display.print(" - ");
     display.print(hostScore);
@@ -290,8 +327,60 @@ void loop() {
     can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
     display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
     can0.enableFIFOInterrupt();
-    delay(60);                    // 60 Hz oppdateringsrate under testing
+    delay(periode);
+
+    //startSpill = ((slaveScore==winScore)||(hostScore==winScore)) ? 2 : 1;   // Game finished?
+    if ((slaveScore==winScore)||(hostScore==winScore)){
+      startSpill = 2;
+      xPos = OLED_WIDTH/2;
+      yPos = OLED_HEIGHT-(ballRadius+8);
+    }
+
   }
+  // ========================================== GAME SCREEN ==========================================
+
+  // ========================================== GAME FINISHED ==========================================
+  while (startSpill == 2){
+    display.clearDisplay();
+
+    if (slaveScore == 10){
+      display.setTextSize(1);
+      display.getTextBounds("Motstanderen vant!", cursorX, cursorY, &X, &Y, &W, &H);
+      display.setCursor((cursorX-W/2), (OLED_HEIGHT/4));
+      display.print("Motstanderen vant!");
+      display.setTextSize(0);
+      display.getTextBounds("Du suger.", cursorX, cursorY, &X, &Y, &W, &H);
+      display.setCursor((cursorX-W/2), (OLED_HEIGHT/4 + 10));
+      display.print("Du suger.");
+      startSpill = 2;
+    }
+    else if (hostScore == 10){
+      display.setTextSize(1);
+      display.getTextBounds("Du vant!", cursorX, cursorY, &X, &Y, &W, &H);
+      display.setCursor((cursorX-W/2), (OLED_HEIGHT/4));
+      display.print("Du vant!");
+      display.setTextSize(0);
+      display.getTextBounds("Motstanderen suger.", cursorX, cursorY, &X, &Y, &W, &H);
+      display.setCursor((cursorX-W/2), (OLED_HEIGHT/4 + 10));
+      display.print("Motstanderen suger.");
+      startSpill = 2;
+    }
+
+    // Svevende Ball
+    yFartBall = sin(PI*t);
+    xFartBall = cos(0.5*t-PI/4);
+    //display.fillCircle(xPos, yPos, (ballRadius+1), BLACK);  // Sletter gammel ball
+    yPos = yPos + yFartBall;
+    xPos = xPos + xFartBall;
+    display.fillCircle(xPos, yPos, (ballRadius+1), WHITE);  // Tegner ny ball
+
+    can0.disableFIFOInterrupt();  //Stopper interrupts når skjermen tegnes
+    display.display();            //Tegner hele bildet etter alle kalkulasjoner har blitt gjort
+    can0.enableFIFOInterrupt();
+    delay(periode); 
+    t += 0.1;
+  }
+  // ========================================== GAME FINISHED ==========================================
   //Serial.println(__TIMESTAMP__); 
 }
 
