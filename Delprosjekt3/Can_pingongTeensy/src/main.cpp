@@ -9,6 +9,8 @@
 #include <string>
 #include <Adafruit_BusIO_Register.h> //MPU6050 dependency
 
+//MPU6050 code from https://github.com/ElectronicCats/mpu6050/blob/master/examples/IMU_Zero/IMU_Zero.ino
+
 MPU6050 mpu; //Create IMU object
 CAN_message_t msgInn;
 CAN_message_t msgUt;

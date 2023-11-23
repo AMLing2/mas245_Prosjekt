@@ -42,19 +42,21 @@ void sendCanMessage(int socketDescriptor);
 
 void myPeriodicTask() //Reads can message from buffer, multiplies data by two, returns CAN message
 {
+
+    //Read function from https://docs.kernel.org/networking/can.html
     int nbytes = read(canSocketDescriptor, &receiveFrame, sizeof(struct can_frame_edit)); //Read CAN from can buffer.
     int meldingLengde = receiveFrame.len;
 
-    std::cout << "Received from teensy: "; //Print mottatt data
+    std::cout << "Received from teensy: "; //Print received data
 
-    for (int j = 0; j < meldingLengde; j++) {
+    for (int j = 0; j < meldingLengde; j++) { //Unpack CAN message into
         std::cout << receiveFrame.data[j];
     }
     std::cout << std::endl;
 
     std::string hexTilString;
 
-    for (int j = 0; j < meldingLengde; j++) {
+    for (int j = 0; j < meldingLengde; j++) { //Transport CAN data bytes to string array
         hexTilString[j] = receiveFrame.data[j];
     }
     
@@ -63,8 +65,8 @@ void myPeriodicTask() //Reads can message from buffer, multiplies data by two, r
     float tallFraImu = std::stof(hexTilString); //Convert string to float
     
     if (tallFraImu < 10.0 && tallFraImu > 4.99) {
-    meldingLengde = 5; //Sets message length to 5 if operation increases number of digits (Example: 9.04 * 2 = 18.08, 4 chars to 5 chars.)
-    }
+    meldingLengde = 5; //Sets message length to 5 if operation increases number of digits (Example: 9.04 * 2 = 18.08, length increased to 5 from 4)
+    }                 //Missing logic for negative values - should be patched in.
 
     tallFraImu = tallFraImu*2.0;     //Arbitrary operation on CAN message data
 
@@ -73,13 +75,8 @@ void myPeriodicTask() //Reads can message from buffer, multiplies data by two, r
 
     std::string sendTilTeensy = std::to_string(tallFraImu); //Float to string conversion
 
-
-
     sendFrame.can_id = 13;
-    
-    
- 
-    sendFrame.len = meldingLengde;
+    sendFrame.len = meldingLengde; //Define outbound message length
   
 
     //Load operated value into return CAN message
@@ -88,16 +85,12 @@ void myPeriodicTask() //Reads can message from buffer, multiplies data by two, r
     }
 
 
-    //Confirm sent data
-
-    std::cout << "Sent to teensy: ";
+    std::cout << "Sent to teensy: ";  //Print sent data
     for (int i = 0; i < meldingLengde; i++) {
         std::cout << sendFrame.data[i];
 
     }
     std::cout << std::endl;
-
-
 
    static uint64_t ii(0U);
    ++ii;
