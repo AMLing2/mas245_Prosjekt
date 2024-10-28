@@ -30,11 +30,12 @@ This project was separated into three miniprojects:
 2) Usage of CAN Bus with Teensy 3.6 Carrier Board, sending and receiveing messages and creating Pong with a tiny interface on OLED *(see demo video in Videoer/Del 2)*
 3) Create a Linux Distribution Software for Raspberry Pi 3. Was connected to Teensy with IMU for reading sensor data
 
-## Demonstrations of the project
+## Project Information
 
-General detailed information is found in the report in current working directory. The videos are shown in the youtube videos below, else in folder named "Videoer".
+- General detailed information is found in the report in current working directory. 
+- Videos (including pong blooper) are found in folder "Videoer"
 
-### Mini Project 1
+<!-- ### Mini Project 1
 
 PWM Soft Blink Demonstration: \
 https://www.youtube.com/watch?v=F8OoI1ZD1LE
@@ -50,4 +51,4 @@ https://www.youtube.com/shorts/bh_fi18cQM4
 ### Mini Project 3
 
 IMU-data over CAN bus Demonstration \
-https://www.youtube.com/watch?v=3Lgbkens8SQ
+https://www.youtube.com/watch?v=3Lgbkens8SQ -->
