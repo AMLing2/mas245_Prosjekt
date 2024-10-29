@@ -2,26 +2,26 @@
 
 *Project for the BSc. course MAS245 Embedded systems for mechatronics*
 
-<img src="bilde_koffert.jpg" alt="drawing" width="400"/> \
+<img src="Bilder/bilde_koffert.jpg" alt="drawing" width="400"/> \
 Pelicase containing hardware for all 3 miniprojects :arrow_up:
 
 #### Mini Project 1
  \
-<img src="bilde_del1-1.jpg" alt="drawing" width="300"/>
-<img src="bilde_del1-2.jpg" alt="drawing" width="270"/>
+<img src="Bilder/bilde_del1-1.jpg" alt="drawing" width="300"/>
+<img src="Bilder/bilde_del1-2.jpg" alt="drawing" width="270"/>
 
 
 #### Mini Project 2
  \
-<img src="bilde_del2-1.jpg" alt="drawing" width="300"/>
-<img src="bilde_del2-2.jpg" alt="drawing" width="300"/>
-<img src="bilde_del2-3.png" alt="drawing" width="465"/>
-<img src="bilde_del2-4.png" alt="drawing" width="140"/>
+<img src="Bilder/bilde_del2-1.jpg" alt="drawing" width="300"/>
+<img src="Bilder/bilde_del2-2.jpg" alt="drawing" width="300"/>
+<img src="Bilder/bilde_del2-3.png" alt="drawing" width="465"/>
+<img src="Bilder/bilde_del2-4.png" alt="drawing" width="140"/>
 
 
 #### Mini Project 3
  \
-<img src="bilde_del3.png" alt="drawing" width="600"/>
+<img src="Bilder/bilde_del3.png" alt="drawing" width="600"/>
 
 ## Overview
 
